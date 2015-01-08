@@ -1,0 +1,448 @@
+\documentclass{report}
+
+\usepackage[]{algorithm2e}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{amsthm}
+\usepackage{xfrac}
+\usepackage{color}
+
+% some commands
+\newcommand{\todo}[1]{{\colorbox{yellow}{\textbf{TODO:} #1}}}
+% abbriviations
+\newcommand{\NP}{\text{$\mathit{NP}$}}
+\newcommand{\Po}{\text{$\mathit{P}$}}
+\newcommand{\NSpace}{\text{$\mathit{NSpace}$}}
+\newcommand{\DTime}{\text{$\mathit{DTime}$}}
+\newcommand{\Space}{\text{$\mathit{Space}$}}
+\newcommand{\bigO}{\text{$\mathcal{O}$}}
+
+% def , lemmas, theorems, examples
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}[definition]{Example}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\begin{document}
+\chapter{Introduction}
+\section{Complexity Theory}
+We study no how difficult or hard it is to solve an instance of a given problem. Typically the hardness is measured as a function of the time (steps) and space (memory) required to find a solution of a problem. We consider \textit{decision problems} where the answer is always ``yes'' or ``no''.
+
+\begin{example}[Graph Reachability] Given a graph $G$ and two nodes $v$, $v'$ of $G$, decide if there is a path from $v$ to $v'$?
+\end{example}
+
+\begin{example}[Propositional Satisfiability] Given a propositional formula $\varphi$, is there a truth assigment that makes $\varphi$ true?
+\end{example}
+
+\begin{example}[Computational Problems] Such problems are not always stated as decision problems, for example one can ask for the length of the shortest path from $v$ to $v'$.
+\end{example}
+
+These problems can visually be transformed into ``equivalent'' decision problem. The path length computation problem can be transformed into asking whether there is a path of length at-most $k$ for some given $k$.
+There exist problems that are \textit{undecidable} which can not be solved by any algorithm, one famous example is the halting problem for turing machines. We consider only problems that can be solved in finite time. Complexity theory is not about algorithm analysis, but about studying the best (theoretically) possible algorithm.
+
+\chapter{Turing Machines}\label{sec:turing-machines}
+The Church-Turing Thesis states that anything that can be computed, can be computed by some turing machine (TM). TMs have the advantage of being simple from the theoretical perspective. A turing machine is a machine that has finite control and infinite type for storing and performing computations. We consider the tape as bounded to the left and unbounded to the right.
+
+\section{Deterministic Turing Machines}\label{sec:turing-machines-det}
+
+\begin{definition}[Deterministic Turing Machine]
+A deterministic turing machine (DTM) is a tuple $M = (Q,\Sigma,\Gamma,\delta,q_0,q_+,q_-)$, where
+\begin{itemize}
+\item[-] $Q$ is a finite set of states where $\{q_0,q_+,q_-\} \subseteq Q$
+\item[-] $\Sigma$ is a finite input alphabet with $\sqcup \in \Sigma$
+\item[-] $\Gamma$ is a finite tape alphabet with $\Sigma \cup \{\sqcup\} \sqsubseteq \Gamma$
+\item[-] $q_0$ is the initial state
+\item[-] $q_+$ is accepting state
+\item[-] $q_-$ si the rejecting state
+\item[-] $\delta: (Q \setminus \{q_+, q_-\} \times \Gamma \rightarrow Q \times \Gamma \times \{\leftarrow,\downarrow,\rightarrow\}$ is a total transition function
+\end{itemize}
+\end{definition}
+The input of a TM is written on the left most position of the tape. And the rest of the tape is filled with the blank sumbol $\sqcup$. The TM starts in the initial state $q_0$ with the head positioned on the first tape cell. The transition function specifies the actions executed by the machine.
+\[\delta(q,a) = (q', b, \leftarrow)\]
+means that when $M$ is in state $q$, and the symbol under the head is $a$, then $M$ replaces $a$ with $b$, switches to state $q'$, and moves the head to the left. If the head is already at the left most position and the execution requires it to move to the left, then the head does not move, but the rest of the execution is performed.
+
+The overall state of a TM is described by a \textit{configuration} a word $uqv$ with $u,v \in \Gamma^*$ and $q \in Q$. This configuration means that the tape content is $uv$ and followed by blank symbols, the TM is in the state $q$ and the head is positioned above the first symbol of $v$. For example $abqaa$ describes:\\EXAMPLE
+
+The configuration $uqv$ is accepting if $q=q_+$, rejecting if $q=q_-$. For every configuration that is neither accepting or rejecting the transition function $\delta$ defines unique successor configuration (denoted by $C \vdash_M C'$)
+\begin{itemize}
+\item[if] $\delta(q,a) = (q',b,\leftarrow)$, then for all $u,v \in \Gamma^*$
+	\begin{itemize}
+		\item[-] $ua'qav \vdash_M uqa'bv$
+		\item[-] $qav \vdash_M q'bv$
+	\end{itemize}
+\item[if] $\delta(q,a) = (q',b,\rightarrow)$, then for all $u,v \in \Gamma^*$
+	\begin{itemize}
+		\item[-] $uqav \vdash_M ubq'v$
+		\item[-] $uq \vdash_M ubq'$ if $a = \sqcup$
+	\end{itemize}
+\item[if] $\delta(q,a) = (q',b,\downarrow)$, then for all $u,v, \in \Gamma^*$
+	\begin{itemize}
+		\item[-] $uqav \vdash_M uq'bv$
+	\end{itemize}
+\end{itemize}
+A (possibly infinite) sequence of successor configurations $C_0 \vdash_M C_1 \vdash C_2 \vdash \dots$ is called a computation of $M$. It is a computation on the input $w \in \Sigma^*$ if $C_0 = q_0w$ and is accepting if it is finite and its last configuration is accepting. $M$ accepts $w$ if its unique computation on $w$ is accepting.
+
+\begin{example}
+\end{example}
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\section{Non-Deterministic Turing Machines}\label{sec:turing-machinges}
+The only difference between deterministic and non-deterministic turing TMs (NTMs) is that they have a choice between several transitions. Instead of transition function $\delta$, NTMs have a transition \textit{relation}.
+\[\Delta \subseteq (Q \setminus \{q_+,q_-\}) \times \Gamma \times Q \times \Gamma \times \{\leftarrow,\downarrow,\rightarrow\}\]
+which can be seen as a function
+\[(Q \setminus \{q_+,q_-\}) \times \Gamma \rightarrow 2^{Q\times\Gamma\times\{\leftarrow,\downarrow,\rightarrow\}}\]
+The relation $\vdash_M$ is defined as for DTMs except that it is no longer a total function, a configuration can have any number (including zero) of $\vdash_M$ successors. Note, it is possible that $\Delta(q,a) = \emptyset$, and thus the TM can not perform any step on the configuration $uqav$.
+
+Given an input $w$, the NTM $M$ has many different computations on $w$. Some may be accepting, some rejecting and some might not even terminate. $M$ \textit{accepts} $w$ if there is some accepting computation of $M$ on $w$, and $M$ \textit{stops} on $w$ if all computations on $w$ are finite.
+
+As for the deterministic case, the language $L(M)$ is the set of all words accepted by $M$, and $M$ \textit{decides} $L$ if $L(M) = L$ and $M$ stops on all inputs. We have, $time_M(w)$ and $space_M(w)$ defined as for DTMs but refer to the maximal $time$ and $space$ use of all computations of $M$ on $w$. DRAW GRAPH HERE
+
+Every DTM is also a NTM, we show that non-determinism does not increase the class of languages accepted by TMs. Given an input $w$, we can construct a tree that describes all the configurations that appear in some computation of NTM. A DTM that traverses this tree breath first will accept the same language.
+
+\begin{theorem}For every $T$-time bounded NTM $M$ there is a $2^{\mathcal{O}(T)}$-time bounded and $\mathcal{O}(T)$-space bounded DTM $M'$, such that $L(M) = L(M')$.
+\end{theorem}
+
+\paragraph{\textit{Proof}} Let $M = (Q,\Sigma,\Gamma,\Delta,q_0,q_+,q_-)$. We consider the set $C$ of all choices given by $\Delta$ \[C = \{(q,a,D)\;|\;\exists\;q',a'.(q',a',q,a,D) \in \Delta\}\]
+we set $d = |C|$ and define the choice alphabet as
+\[\Sigma_{ch} := \{a_{q,a,D}\;|\;(q,a,D) \in C\}\]
+We simulate $M$ using a 3-type DTM $M'$, with an input tape. Since $M$ is $T$-time bounded it stops on every input. Every computation can be seen as a finite sequence of choices, each choice determines uniquely the next configuration.
+
+The DTM $M'$ successively generates all sequences of symbols from $\Sigma_{ch}$ on the second tape in order of increasing length. For each sequence, $M'$ simulates the computation of $M$ that corresponds to this sequence (if it exists) on the third tape.
+
+Only one configuration of $M$ is stored in the tape. $M'$ accepts as soon as it finds an accepting configuration for $M$, and rejects when the chain in the second type is longer then $T(|w|)$. The number of nodes of the computation tree is bounded by $d^{T(n)+1}-1$. Moreover, each transition can be simulated using at most $c*T(n)$ steps for some constant $c$. $M'$ stops after at most $(d^{T(n)+1}-1)*c*T(n)$ steps, which is in $2^{\mathcal{O}(T(n))}$.
+
+For space bound, the second tape uses $\mathcal{O}(T(n))$ cells to produce the sequence of choices of length at most $T(n)$, and the third tape simulates the computations of $M$ and needs as much space as $M$ does. Since $M$ is $T$-time bounded it is also $T$-space bounded over all we get an $\mathcal{O}(t(n))$ space bound.
+
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\chapter{General Complexity Classes}\label{sec:complexity-classes}
+Complexity classes are determined by the computational model used (in our case, DTM or NTM) and a bound on the resources available. Mainly these parameters define a class of problems that can be decided by one of these machines within the given bounds.
+
+\begin{definition}Let $T$ and $S$ be functions from $\mathbb{N}$ to $\mathbb{N}$.
+\begin{itemize}
+\item[-] \underline{$DTime_k(T)$} is the set of all languages $L$ that can be decided by a $T$-time bounded $k$-type DTM
+\item[-] $\underline{DTime(T)} = \bigcup_{k\geq1}DTime_k(T)$
+\item[-] \underline{$DSpace_k(S)$} is the set of all languages $L$ that are decided by a $S$-space bounded $k$-tape DTM
+\item[-] $\underline{DSpace(S)} = \bigcup_{k\geq1}DSpace_k(S)$
+\end{itemize}
+\end{definition}
+These classes state resource bounds for the worst case. A machine is $T$-time bounded if it stops after at-most $T(n)$ steps on all words of length $n$. For a given problem there could only be one word of this length that needs $T(n)$ steps to be deced.
+
+A branch of complexity theory studies the \textit{average case complexity}. This needs a characterization of the average case, and other special techniques. Some of the most important complexity classes are
+\[
+\begin{array}{c}
+	\begin{array}{rll}
+		P &= &\bigcup_{d\in\mathbb{N}}DTime(n^d)\\
+		PSpace &= &\bigcup_{d\in\mathbb{N}}DSpace(n^d)\\
+		ExpTime &= &\bigcup_{d\in\mathbb{N}}DTime(2^{n^d})\\
+		ExpSpace &= &\bigcup_{d\in\mathbb{N}}DSpace(2^{n^d})\\
+		LogSpace &= &\bigcup_{d\in\mathbb{N}}DSpace(d\;log\;n)
+	\end{array}
+	\begin{array}{rll}
+		NP &= &\bigcup_{d\in\mathbb{N}}NTime(n^d)\\
+		NPSpace &= &\bigcup_{d\in\mathbb{N}}NSpace(n^d)\\
+		NExpTime &= &\bigcup_{d\in\mathbb{N}}NTime(2^{n^d})\\
+		NExpSpace &= &\bigcup_{d\in\mathbb{N}}NSpace(2^{n^d})\\
+		NLogSpace &= &\bigcup_{d\in\mathbb{N}}NSpace(d\;log\;n)
+	\end{array}
+\end{array}
+\]
+For the last two classes we need to use TMs with an input tape. A $LogTime$ class makes no sense, since it would require a machine that can decide a language without reading the whole input ($T(n) < n$).
+
+On a general sense, complexity theory tries to understand the properties and relationships between these complexity classes. This can be useful for better understanding a problem, or the methods that can solve them. There is an obvious connection between deterministic and non-deterministic classes, which follows the relations between DTMs and NTMs.
+
+\begin{lemma}
+\[
+\begin{array}{rll}
+	DTime(T) &\subseteq &NTime(T)\quad\text{ and}\\
+	DSpace(S) &\subseteq &NSpace(S)
+\end{array}
+\]
+\end{lemma}
+
+\begin{theorem}TODO theorem 3.3
+\end{theorem}
+
+\begin{theorem}[3.7]If $S$ is space constructible function, then $\NSpace(S) \subseteq \DTime(2^{\bigO(S)})$.
+\end{theorem}
+
+\paragraph{Proof}Take $L \in \NSpace(S)$ by Theorem \ref{}, there is an $S$-sapce bounded single-tape NTM $M$, with $L(M) = L$. We construct a DTM $M'$ that does the following on every input $w$ of length $n$:
+\begin{itemize}
+\item[-] fine $S(n)$ by running(?) the DTM $M_S$, such that $\Space_M(w) = S(|w|)$ ($S$ is space constructible) on a separate tape,  the number of tape cells used in that tape gives a unitary(?) encoding of $S(n)$
+\item[-] construct the graph $G_M(S(n))$ as follows
+\begin{itemize}
+\item generate all configurations. These are all words from $(Q \cup \Gamma)^*$ of length at most $S(n)+1$, with exactly one symbol from $Q$
+\item for each pair of configurations $c,c'$ check whether $c \vdash_M c'$
+\end{itemize}
+\item[-] for each accepting configuration $c$ in the graph, check whether it is reachable from $q_0w$ or not
+\end{itemize}
+From Theorem \ref{3.3} (Part 2), we know that $M_S$ runs in time at most $2^{\bigO(S)}$. There are at most $2^{\bigO(S)}$ configurations in $G_M(S(n))$, and hence
+\begin{itemize}
+\item[i)]$G_M(S(n))$ is generated in time $2^{\bigO(s)}$, and 
+\item[ii)]at most $2^{\bigO(S(n))}$ reachability problems need to be solved to decide the language.
+\end{itemize}
+As we will show later that each reachability problem can be solved in polynomial time, this yields the desired time bound. $\#$\\
+
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\section{asdf}
+The Theorem does not imply that LogSpace = NLogSpace, due to the quadratic blowup obtained by the transformation. However, the equivalence of these classes also has been shown (Immerman and Szelepcsenyi). Overall, we have the following hierarchy:
+\[ \text{LogSpace} \subseteq P \subseteq NP \subseteq PSpace \subseteq ExpTime \subseteq NExpTime \subseteq ExpSpace\]
+
+An important question is to determine which of these inclusions are strict Many long-standing open problems of complexity theory refer to (parts of) this question. For example, there is equivalent of Savitch's theorem for time complexity classes. Such a theorem would imply equivalence of deterministic and non-deterministic machines w.r.t. bounded computations, and in particular, that $P=NP$.
+
+\chapter{Tractability and Intertractability}
+One relevant distinction in computational complexity is between those problems that can be solved \textit{efficiently} (called tractable) and this that cannot (intractable). We  now present two prelims on graphs, one of which is tractable, and the other not.
+
+The \textit{graph reachability problem} consists in deciding, given a graph $G=(V,E)$ and two nodes $v,v' \in V$, whether these are nodes  $v_0,...,v_n (n\geq0)$ such that $v=v_0$, $v'=v_n$ and $(v_i,v_{i+1}) \in E$ for all $0 \leq i < n$.
+\[
+\text{REACH} = \{ (G,v,v') | G=(V,E) \text{is such that} v' \text{is reachable from} v\}
+\]
+
+The following pseudocode describes an algorithm for reachability:
+\begin{algorithm}[h]
+ %\KwData{S := \{v\}}
+ %\KwResult{how to write algorithm with \LaTeX2e }
+ S := \{v\}
+ mark v\;
+ \While{$S\neq\emptyset$}{
+  choose $v\in S$\;
+  $S := S \setminus \{v\}$\;
+  \ForEach{edge $(v,v')\in E$}{
+  	\If{$v'$ is not marked}{
+	mark $v'$\;
+	$S := S \cup \{v'\}$\;
+	}
+	\eIf{$v'$ is marked}{return yes\;}{return no\;}
+  }
+ }
+% \caption{How to write algorithms}
+\end{algorithm}
+This algorithm is correct and terminates after $\mathcal{O}(n^2)$ steps, where $n$ is the number of nodes in the graph:
+\begin{itemize}
+\item each node appears at mose once in $S$, thus the while loop is repeated $n$ times
+\item the for loop iterates at most $n$times, in each iteration of the while loop
+\end{itemize}
+In facts, the number of steps can be bounded by $\mathcal{O}(n+m)$, where $m=|E|$\quad$(m\leq n^2)$. Consider a graph with  $n=1000$. The algorithm needs approx. $n^2=10^6$ steps, which can be done by a modern computer in less than a second. Runtime behavior $\mathcal{O}(n^2)$ is considered \textit{efficient} and this problem is \textit{tractable}.
+
+\paragraph{Intractable problem} An undirected graph is a par $G=(V,E)$ with $V$ a set of nodes and $E$ a set of sets $\{u,v\}\subseteq V$ of cardinality two. A k-clique in $G$ is a set $C \subseteq V$ of cardinality $k$ such that $\{u,v\} \in E$ for every $u,v \in C$.
+\[
+\text{CLIQUE} = \{(G,k)\ |\ G \text{ contains a k-clique}\} 
+\]
+We can assume that $k$ is always $\leq|V|$, if $k>|V|$ the answer is trivially no. An obvious algorithm  for deciding this problem is the following:
+\begin{algorithm}[h]\label{alg:clique}
+\ForAll{$S \subseteq V$ of size $k$}{
+	$f=1$\;
+	\ForAll{$u,v \in S$, $u \neq v$}{
+		\If{$\{u,v\} \not\in E$}{
+			$f=0$\;
+		}
+	}
+	\If{$f=1$}{return yes}
+}
+return no\;
+\end{algorithm}
+
+This algorithm is much less efficient than the one for reachability. Before it can answer no, it must run the outer for loop $n \choose k$. If  $k=n/2$, then ${n \choose k} \geq 2^n$, meaning that the algorithm takes exponentially many steps on the size of the graph. If $n=1000$, and $k=500$, this algorithm needs $2^{1000} > 10^{300}$ steps. Of course, it could be that we have chosen a wrong method, and that better algorithms exist. The question is whether \textit{all} algorithms \textit{must be} that inefficient.\\
+
+This suggests that a problem is tractable if it can be soled by a DTM in polynomial time (tractable iff in P). Notice, however, that this notion is not always intuitive: an algorithm with runtime $n^{1000}$ is still polynomial, but will require long execution times even for small inputs, dually $2^{\sfrac{n}{1000}}$ is exponential, but efficient for large inputs. The distinction between tractable and non-tractable problems is just an heuristic and man exceptions can be found: one such example is the simplex method for linear programming. Although it is exponential, it performs well (and is used) in practice. Other (polynomial time) algorithms usually have a worse performance.\\
+
+When defining complexity classes, we ignored multiplicative constants using the big-$\mathcal{O}$ notation. We will now justify this choice by showing that adding multiplicative constants does not give more expressive power. Most DTMs can be sped-up by any constant factor.
+
+\begin{theorem}[Speedup Theorem]\label{thm:speedup}
+Let $T: \mathbb{N} \rightarrow \mathbb{N}$, be such that $n \in o(T)$, $DTime(T) \subseteq DTime(max\{n,\ulcorner \epsilon*T\urcorner\})$ for every $\epsilon \in (0,1]$.
+\end{theorem}
+
+\paragraph{Proof} Let $L\in DTime(T)$ and $M$ a $k$-tape DTM deciding $L$ in time $T(n)$. We construct a $k+1$-tape TM $M'$ that works over the alphabet $\Gamma \cup \Gamma^m$, where $m$ is a constant that we will fix later. The idea is that $M'$  represents (and uses) $m>1$ symbols from $M$ in one symbol.\\
+For example, if $m=2$ ...This not only saves space, but allows $M'$ to execute many steps from $M$ in only one step. A computation on $M'$ looks as follows:
+\begin{itemize}
+\item[-] $M'$ first copies the input of $M$ into the new tape, compressing $m$ symbols of $\Sigma$ into one of $\Sigma^m$, and takes the head back to the beginning of the tape. This needs $n+\ulcorner \sfrac{n}{m} \urcorner$ steps.
+	\item[-] $M'$ simulates $m$ steps of $M$ using 8 steps, where the following is done simultaneously on every tape:
+	\begin{itemize}
+		\item[+] $M'$ saves the content of the neighboring cells from its current position (using a state). Since there are at most $2m$ symbols to store, this can be done in four steps (left, right,right,left).
+		\item[+] In $m$ steps, $M$ can only access the tape cells that are at a distance at most $m$ from the current cell. In $M'$, all those cells are represented in the current cell and its (left and right) neighbors. $M'$ has enough information to compute the result of the next $m$ steps of $M$, and can execute them in four steps.
+	\end{itemize}
+	\item[-] $M'$ accepts/rejects an input iff $M$ does.
+\end{itemize}
+On an input of length $m$, $M'$ performs
+\[n+\ulcorner \sfrac{n}{m} \urcorner + 8 \ulcorner\frac{T(n)}{m}\urcorner \leq n + \frac{n}{m} + 8 \frac{T(n)}{m}+9
+\]
+steps\footnote{$\ulcorner x \urcorner \leq x+1$.}. Since $n \in o(T)$, these is an $n_o \geq 8$ such that for all $n>n_o$, it holds that $n\leq\frac{T(n)}{m}$. The number of steps executed by $M'$ on input of length $n$ is bounded by:
+\[
+\begin{array}{rll}
+n+\frac{n}{m}+\frac{8T(n)}{m}+9 &\leq &2n + \frac{n}{m} + 8 \frac{T(n)}{m}\\
+&\leq &2 \frac{T(n)}{m} + \frac{T(n}{m^2}+8\frac{T(n)}{m}\\
+&\leq &T(n) * \frac{11}{m}
+\end{array}
+\]
+Pick $m$ such that $\epsilon*m\geq11$. Then 
+\[ T(n) * \sfrac{11}{m} \leq \epsilon*T(n)\]
+Thus, $M'$ is $\ulcorner\epsilon*(Tn)\urcorner$-bounded for every input of length $\geq n_0$. These are only finitely many inputs (with length $n\leq n_0$) for which this bound might not work. Since they are finitely many, they can be hardcoded in the translation: the machine reads the whole input and immediately accepts or rejects these words. Overall, the machine has a runtime bounded by  $max\{n, \ulcorner\epsilon*T\urcorner\}$. \#\\
+
+This theorem show that if a TM runs in super linear time $c*f(n)$, then this $c$ can be made arbitrarily small. This justifies the use of the $\mathcal{O}$ notation, and our definition of $P$ in terms of polynomials of the form $n^d$: $9n^2 + \sfrac{5}{n} + 3 \leq 63n^2$, and by the Theorem \ref{thm:speedup}, this coefficient can be reduced to 1.
+
+\begin{theorem}[Space Compression]\label{thm:space-compression}
+Let $S:\mathbb{N}\rightarrow \mathbb{N}$.\\$DSpace(S) \subseteq DSpace(max\{n,\ulcorner \epsilon*S \urcorner\})$ for all $\epsilon \in (0,1]$.
+\end{theorem}
+Similar results regarding machines running in linear time, and non-deterministic machines also exist. If the resources are increased faster (not only by a constant factor), then we can solve more problems. We show that $P$ is strictly contained in $ExpTime$:
+\[P \subseteq PSpace \subseteq ExpTime \]\[
+P \subset ExpTime \]
+This means, that at least one of the three inclusions must be strict, but not which one. To show this result, we use a representation of TMs as words over some fixed alphabet $\Sigma_{TM}$ and thus can use them as inputs to some other TMs. Assume that the set of states of a TM is represented by the first $k$ natural numbers $\{1, \dots, k\}$, where
+
+\[\begin{array}{c}
+q_0 = 1\\
+q_1 = 2\\
+q_3 = 3
+\end{array}\]
+
+The symbols are also represented using natural numbers. We can then use their binary encoding ($\{0,1\}\subseteq\Sigma_{TM}$) to represent them in the tape. To represent a TM, we need only to encode its transition relation: from it, the number of tapes, the set of states, and the set of symbols can be deduced. We assume that there exists a fixed representation scheme for it, and denote by $\hat{M}$ and $\hat{w}$ the $\Sigma_{TM}$ encoding of the turing machine $M$ and input $w$. Let now $H$ be the following language over
+\begin{itemize}
+\item[] $\Sigma_{TM} \uplus \{;\}$
+\item[] $H := \{ \hat{M};\hat{w} | \text{the DTM M accepts w after at most }2^{|w|} steps.\}$
+\end{itemize}
+
+\begin{lemma}
+$H \not\in P$.
+\end{lemma}
+
+\paragraph{Proof} Assume that  $H \in P$. By Theorem 2.3, there is a DTM $M_H$ such that $L(M_H)=H$ and $M_H$ is $n^d$-time bounded for some $d \in \mathbb{N}$. Assume w.l.o.g. that $d \geq 2$. We construct a new DTM $D$ that first duplicates its input $w$ to $w;w$ and then behaves as $M_H$.
+
+\begin{definition}
+Let $L\subseteq\Sigma^*$. A relation $R\subseteq\Sigma^* \times \Gamma^*$ is a proof relation for L iff:
+\begin{itemize}
+\item[soundness] for all $\rho\in\Gamma^*$, $(w,p)\in R$ implies $w\in L$
+\item[soundness] $w \in L$ implies $(w,\rho)\in R$ for some $\rho\in\Gamma^*$
+\end{itemize}
+If $(w,\rho)\in R$, then $\rho$ is called a proof for $w\in L$. $R$ is polytime verifiable if:
+\begin{itemize}
+\item[i] there is a $k\geq1$ such that $|\rho| \leq |w|^k$ for all $(w,\rho)\in R$
+\item[ii] it is in $P$ to decide, given $(w,\rho)\in \Sigma^*\times\Gamma^*$, whether $(w,\rho)\in R$
+\end{itemize}
+\end{definition}
+For example, $\mathrm{CLIQUE}$ has the polytime verifiable proof relation $\{((G,k),S)\ |\ S\subseteq V \text{ is a k-clique in G}\}$. Obviously, there exist problems that do not have such proof relations. For instance, consider the problem of deciding wether a word $w$ is accepted by a $2^{2^n}$-time bounded DTM $M$.
+
+\begin{theorem}For every $L\subseteq\Sigma^*$, $L\in NP$ iff $L$ has a polytime verifiable proof relation.
+\end{theorem}
+
+\paragraph{Proof}[if] If $R$ is a polytime verifiable proof relation for $L$ with bound $|w|^k$ on the proof length,  then a polynomial time bounded NTM can decide $L$ by guessing a $\rho\in\Gamma^*$ of length at most $|w|^k$ and checking in polynomial time, if $(w,\rho)\in R$.
+
+[only if] If $L\in NP$, then there exists a NTM $M$ that decided $L$ in time $n^k$ for some $k\in\mathbb{N}$. Define the relation $R$ as follows: $(w,\rho)\in R$ off $\rho$ is the encoding of an accepting computation of $M$ on input $w$. Clearly $R$ is a proof relation for $L$. Since $M$ runs in polynomial time, and it is possible to check in polynomial time whether a sequence of configurations is an accepting computation of a NTM, $R$ is polytime verifiable. $\#$\\
+
+This Theorem states that a problem is in $NP$, iff ``yes'' instance has a short proof that can be verified efficiently. Notice in particular, that this definition does not require NTMs.
+
+We know already that $\mathrm{CLIQUE}$ is in $NP$ and $P\subseteq NP$, but we still do not know whether $\mathrm{CLIQUE} \in P$. A partial answer to this question can be given through the notion of \textit{completeness}. Intuitively, a problem is complete for the complexity class $C$ ($C$-complete), if it is in $C$ and at least as hard as every problem in $C$.
+
+\begin{definition}Let $L\subseteq\Sigma^*$ and $L'\subseteq\Gamma^*$. A polynomial time reduction from $L$ to $L'$ is a function $f:\Sigma^*\rightarrow\Gamma^*$ such that: 
+\begin{itemize}
+\item[-] $w\in  L$ iff $f(w)\in L'$ for all $w\in \Sigma^*$, and
+\item[-] $f$ can be computed in polynomial time.
+\end{itemize}
+$L$ is polynomially reducible to $L'$ ($L\leq_\rho L')$ off there is a polynomial time reduction from $L$ to $L'$.
+\end{definition}
+The idea is that if $L\leq_\rho L'$, then a decision procedure for $L'$ can be used for deciding $L$, meaning that $L'$ is at least as hard as $L$.
+
+\begin{lemma} Let $C \in \{P,NP,PSpace,ExpTime,NExpTime,ExpSpace\}$. If $L\leq_\rho L'$ and $L'\in C$, then $L \in C$.
+\end{lemma}
+\paragraph{Proof} ($C=P$) Since $L\leq_\rho L'$, there exists a function $f$ sucht that $w\in L$ off $f(w)\in L'$, and a $n^d$-time bounded DTM $N$ that computes $f$. $L'\in P$ implies that there is a $n^{d'}$-time bounded DTM $M$ that decides $L'$. We can decide $L$ by a $(n^d)^{d'}$-time bounded DTM by running $M$ after $N$. The other classes are analogues. $\#$\\
+
+For $LogSpace$, this Lemma does not hold. In that case we need a logspace-reduction which should be computable in logarithmic space.
+
+\begin{definition}Let $C\in\{P,NP,PSpace,ExpTime,NExpTime,ExpSpace\}$. $L'$ is $C$-hard, if for all $L\in C$ we have $L\leq_\rho L'$. It is $C$-complete if it is $C$-hard and in $C$.
+\end{definition}
+For the classes $P$ and $LogSpace$, hardness is defined in herms of logspace reductions. The first problem shown to be $NP$-complete was propositional satisfiability
+\[ \mathrm{SAT} := \{\varphi\ |\ \varphi \text{ is a satisfiable propositional formula}\} \]
+
+\begin{theorem}[Cook,Levin] $\mathrm{SAT}$ is $NP$-complete.
+\end{theorem}
+\paragraph{Proof} The problem is clearly in $NP$: given $\varphi$, guess truth assignment for the variables in $\varphi$ (polynomial many) and check whether it satisfies the formula. We need to show that it is $NP$-hard, i.e.\ $L\leq_\rho \mathrm{SAT}$ for all $L \in NP$. Let $L$ be an arbitrary problem in $NP$. Then, there exists a (1-tape) NTM $M$ and $k\geq 0$ such that $L(M)=L$ and $M$ is $n^k$-time bounded. We show how to construct in polynomial time, for every input $w$ of $M$ a propositional formula $\varphi_w$ such that $\varphi_w$ is satisfiable iff $M$ accepts $w$. The idea is to construct a formula that describes the accepting computations of $M$ on $w$. One such computation can be seen as a matrix:
+\[
+\begin{array}{c|c|c|c|c|c|c}
+q_0,a_0 & a_1 & \dots & q_n & \sqcup & \dots & \sqcup\\
+b & q,a_1 & \dots & a_n & \sqcup & \dots & \sqcup\\
+b & q',b' & \dots & a_n & \sqcup & \dots & \sqcup
+\end{array}
+\]
+where both, the width (space used by the tape) and the height (number of steps) are bounded by $n^k+1$. The entries of this matrix are represented through the following variables:
+\begin{itemize}
+\item[-] $T_{a,i,t}$: at time $t$, tape cell $i$ has label $a$
+\item[-] $H_{i,t}$: at time $t$, the head is on cell $i$
+\item[-] $S_{q,t}$: at time $t$, $M$ is in state $q$
+\end{itemize}
+where $a\in\Gamma$, $q \in Q$, $0 \leq t,i \leq n^k$. The initial configuration for $w = a_0 \dots a_{n-1}$ is described by the formula:
+\[ \varphi_{\text{ini}} := S_{q_0,0} \land H_{0,0} \land \bigwedge_{0\leq i<n} T_{a_i,i,0} \land \bigwedge_{n\leq i \leq n^k} T_{\sqcup,i,0} \]
+Using $\rightarrow(i)=i+1$, $\downarrow(i)=i$, $\leftarrow(i)=\{i-1, if i>0, 0 if i=0\}$. The moves of $M$ are characterized by the formula 
+\[
+\varphi_{move} := \bigwedge_{q\in Q \setminus \{q_+,q_-\}, a \in \Gamma, 0\leq i,t\leq n^k}((S_{q,t} \land H_{i,t} \land T_{a,i,t}) \rightarrow \bigvee_{(q,a,q',a',D) \in \Delta, 0\leq D(i) \leq n^k}(S_{q',t+1} \land H_{D(i),t+1} \land T_{a',i,t+1})
+\]
+We ensure that only the cels at the same position as the head can be changed:
+\[
+\varphi_{keep} := \bigwedge_{q\in\Gamma,0\leq i \leq n^k, 0\leq t \leq n^k}(\neg H_{i,t} \land T_{a,i,t} \rightarrow T_{a,i,t+1})
+\]
+and that $M$ terminates successfully:
+\[
+\varphi_acc := \bigvee_{0\leq t\leq n^k}(S_{q,t} \land \bigwedge_{0\leq t'\leq t}\neg S_{q_-,t})
+\]
+Finally, we use an auxiliary formula to ensure that the state and labelings are unique, and the head is always at only on position.
+\[
+\varphi_{aux} := \bigwedge_{t,q,q',q\neq q'}\neg(S_{q,t} \land S_{q',t}) \land \bigwedge_{i,t,a,a',a\neq a'}\neg (T_{a,i,t} \land T_{a',i,t}) \land \bigwedge_{t,i,j,i\neq j}\neg (H_{i,t} \land H_{i',t})
+\]
+the $M$ accepts $w$ iff
+\[\varphi_w := \varphi_{ini} \land \varphi_{move} \land \varphi_{keep} \land \varphi_{acc} \land \varphi_{aux}\]
+is satisfiable (exercise) $\#$\\
+
+Knowing an $NP$-hard problem is helpful for proving $NP$-hardness of other problems.
+
+\begin{lemma}Let $C$ be a complexity class closed under polynomial reductions. If $L$ is $C$-hard and $L \leq_\rho L'$, then $L'$ is $C$-hard. \#
+\end{lemma}\noindent
+We use this lemma to show that a restricted version of $\mathsf{SAT}$ is also $NP$-complete. A $3$-clause is the disjunction of exactly three different literals, a $3$-formula is a conjunction of $3$-clauses. For example, 
+\[ (a \lor b \lor \neg c) \land (\neg b \lor c \lor \neg d)\]
+is a $3$-formula.
+\[  \mathsf{3SAT} := \{ \varphi\;|\;\varphi \text{ is a satisfiable 3-formula }\} \]
+
+\begin{theorem}$\mathsf{3SAT}$ is $NP$-complete.
+\end{theorem}
+
+\paragraph{Proof} $\mathsf{3SAT}$ is a special case of $\mathsf{SAT}$, and hence also in $NP$.
+
+To prove hardness we give a polynomial reduction from $\mathsf{SAT}$ to $\mathsf{3SAT}$. Let $\varphi$ be a propositional formula. We transform it into $\mathsf{nnf}(\varphi)=\varphi'$ in polynomial time. Let $\Gamma$ be the set of all sub formulas of $\varphi'$ (including $\varphi'$). The cardinality of $\Gamma$ is bounded by the length of $\varphi'$ (at most one sub formula for every position in $\varphi'$). Define a substation function $s$ that replaces all non-literal formulas $\sigma \in \Gamma$ with a fresh variable $\rho\sigma$
+\[
+s(\sigma) := \left\{ \begin{array}{ll}\sigma & \sigma \text{ is a literal}\\\rho_\sigma & \text{otherwise}\end{array}\right.
+\]
+Set
+\[
+\psi := \bigwedge_{\sigma = \eta \land \chi \in \Gamma} (\rho_\sigma \leftrightarrow (s(\eta) \land s(\chi))) \land \bigwedge_{\sigma = \eta\lor\chi\in\Gamma}(\rho_\sigma \leftrightarrow (s(\eta) \lor s(\chi))).
+\]
+$\varphi$ is satisfiable off $\psi\land\rho_{\varphi'}$ is satisfiable, and the latter can be constructed in polynomial time. We now show how to transform the formulas $l_1 \leftrightarrow l_2 \land l_3$ and $l_1 \leftrightarrow l_2 \lor l_3$, where $l_i$ are literals, into 3-formulas. $l_1 \leftrightarrow (l_2 \land l_3) \leadsto (\neg l_1 \lor (l_2 \land l_3)) \land (\neg(l_2\land l_3)\lor l_1) \leadsto (\neg l_1 \lor l_2) \land (\neg l_1 \lor l_3) \land (\neg l_2 \lor \neg l_3 \lor l_1) \leadsto (\neg l_1 \lor l_2 \lor x) \land (\neg l_1 \lor l_2 \lor \neg x) \land (\neg l_1 \lor l_3 \lor y) \land (\neg l_1 \lor l_3 \lor \neg y) \land (\neg l_2 \lor \neg l_3 \lor l_1)$, where $x$ and $y$ are new variables. the case for disjunction is analogous. \#\\
+
+We can now show that $\mathsf{CLIQUE}$ is also $NP$-hard.
+
+\begin{theorem} $\mathsf{CLIQUE}$ is $NP$-complete.
+\end{theorem}
+
+\paragraph{Proof} We show $\mathsf{3SAT} \leq_\rho \mathsf{CLIQUE}$. Let $\varphi = (l_{1,1} \lor l_{1,2} \lor l_{1,3}) \land \dots \land (l_{k,1} \lor l_{k,2} \lor l_{k,3})$ be a 3-formula. We define a graph $G_\varphi = (V,E)$, where:
+\begin{itemize}
+\item[-] $V = \{ <i,j>\;|\;1\leq i \leq k, 1\leq j \leq 3\}$
+\item[-] $E = \{\{<i,j>,\;<i',j'>\}\;|\;i\neq i', \text{and }l_{i,j} \text{ does not contradict }l_{i',j'}\}$
+\end{itemize}
+We show that $\varphi$ is satisfiable iff $G_\varphi$ has a $k$-clique.\\
+\textbf{(only if)} If $\varphi$ is satisfiable, then there is a truth assignment that makes at least one literal of every clause true. Select one of these from every clause, obtaining a set of $W\subseteq V$. Since there are $k$ clauses, we have $|W| = k$. For each $<i,j>\neq<i',j'> \in W$ by construction $i\neq i'$ and since they are satisfiable by the same valuation, $l_{i,j}$ cannot contradict $l_{i',j'}$. Thus $W$ is a $k$-clique.\\
+\textbf{(if)} Let $W \subseteq V$ be a $k$-clique of $G_\varphi$, and $O$ the set of associated literals. Since $W$ is a clique, the literals in $O$ do not contradict each other, and we can build a truth assignment $t$ that makes them all true. Additionally, there are no pairs of nodes in $W$ representing literals from the same clause. Since $W$ is of size $k$, $O$ contains a  literal for each clause and thus $t$ satisfies $\varphi$ \#\\
+
+There are many other $NP$-complete problems. This class is helpful for understanding the relationship between $P$ and $NP$. It is generally believed that $P \neq NP$, but it has not been proven. To prove the contrary, it would suffice to find a polynomial time algorithm for \underline{any} $NP$-hard problem.
+
+\begin{theorem}If there is a \NP-hard problem in \Po, then $\Po=\NP$.
+\end{theorem}
+
+\paragraph{Proof}Let $L$ be \NP-hard and in \Po, and let $L' \in \NP$. Since $L$ is \NP-hard $L' \leq_\rho L \in \Po$. Thus $L' \in \Po$ (Lemma 4.7) \#\\
+
+One might have the impression that every problem in \NP is either in \Po or \NP-hard. This is only true if $\Po=\NP$.
+
+\begin{theorem}[Ladner's Theorem]If $\Po=\NP$, then there is a language $L\in\NP\setminus\Po$ that is not \NP-complete. \#
+\end{theorem}
+There is no known natural problem that falls in this category. A famous candidate is the graph isomorphism probm: given two graphs $G_1$ and $G_2$, is it possible to rename the nodes of $G_1$, such that $G_1=G_2$?
+
+\end{document}
+
