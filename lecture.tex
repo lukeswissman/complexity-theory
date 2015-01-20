@@ -5,6 +5,7 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usetikzlibrary{positioning}
 \usepackage{amsthm}
 \usepackage{xfrac}
 \usepackage{color}
@@ -531,7 +532,7 @@ Validity is defined inductively on the length of the chain of quantifiers. If $\
 
 \begin{definition} A QBF formula $Q_1p_1.Q_2p_2. \ldots Q_np_n.\varphi$ is \emph{valid} iff
 \begin{enumerate}
- \item $Q_1 = \exists$ and at least one of the formulas $Q_2p_2. \ldots Q_np_n.\varphi[p_1/1]$ and $Q_2p_2. \ldots Q_np_n.\varphi[p_1/0]$ is valid. 
+ \item $Q_1 = \exists$ and at least one of the formulas $Q_2p_2. \ldots Q_np_n.\varphi[p_1/1]$ and \\ $Q_2p_2. \ldots Q_np_n.\varphi[p_1/0]$ is valid. 
  \item $Q_1 = \forall$ and both $Q_2p_2. \ldots Q_np_n.\varphi[p_1/1]$ and $Q_2p_2. \ldots Q_np_n.\varphi[p_1/0]$ are valid. 
  \item $n = 0$ and $\varphi$ (which contains no variables) evaluates to $1$.
 \end{enumerate} 
@@ -539,8 +540,72 @@ Let $QBF$ denote the set of all valid QBF formulas.
 \end{definition}
 
 Consider for example the QBF $\psi = \forall p_1.\exists p_2. \forall p_3. p_1 \to p_2 \lor p_3$. To check the validity of $\psi$ we can use an \emph{and-or tree}. 
-
-Each level corresponds to a quantifier, $\forall$-levels use $\land$-branching and $\exists$-levels use $\lor$-branching. 
+\begin{figure}[!ht]
+ \centering
+ \tikzstyle{tn} = [fill, circle, inner sep = .2em]
+\tikzstyle{tns} = [fill, circle, inner sep = .1em]
+\begin{tikzpicture}[sibling distance = 8em, level 2/.style={sibling distance = 4em}, level 3/.style={sibling distance = 3em}, level distance = 2.5em]
+	\node[tn] (root) {}
+		child {
+			node[tn] (1) {}
+			child {
+				node[tn] (11) {} 
+				child {
+					node[tns] (111) {}
+				}
+				child {
+					node[tns] (112) {}
+				}
+			}
+			child {
+				node[tn] (12) {} 	
+				child {
+					node[tns] (121) {}
+				}
+				child {
+					node[tns] (122) {}
+				}
+			}
+		}
+		child {
+			node[tn] (2) {}
+			child {
+				node[tn] (21) {} 	
+				child {
+					node[tns] (211) {}
+				}
+				child {
+					node[tns] (212) {}
+				}
+			}
+			child {
+				node[tn] (22) {} 	
+				child {
+					node[tns] (221) {}
+				}
+				child {
+					node[tns] (222) {}
+				}
+			}
+		};
+	\node[ right = 8em of root, yshift = -1em] {$\forall$};
+	\node[ right = 4em of 2, yshift = -1em] {$\exists$};
+	\node[ right = 2em of 22, yshift = -1em] {$\forall$};
+	
+	\foreach \n in {root, 11,12,21,22}
+		{\node [below = 0.2em of \n] {$\land$};}
+	\foreach \n in {1,2}
+		{\node [below = 0.2em of \n] {$\lor$};}
+	
+	\foreach \n in {111,112,121,122,212,221,222}
+		{\node [below = 0.2em of \n] {$1$};}
+	\node[below = 0.2em of 211] {$0$};
+	\foreach \n in {1,11}{\node [left = 0.2em of \n] {$1$};}
+	\foreach \n in {root,12,2,22}{\node [right = 0.2em of \n] {$1$};}
+	\node[left = 0.2em of 21] {$0$};
+\end{tikzpicture}
+\caption{Each level corresponds to a quantifier, $\forall$-levels use $\land$-branching and $\exists$-levels use $\lor$-branching. }
+\end{figure}
 
 \begin{theorem} $QBF$ is in $PSpace$.
 \end{theorem}
@@ -550,6 +615,36 @@ Notice that $QBF$ is $\NP$-hard: a propositional formula $\varphi$ is satisfiabl
 
 \begin{theorem} $QBF$ is $PSpace$-hard.
 \end{theorem}
+
+\paragraph{Proof} Let $L \in PSpace$, then there exists a $d \geq 0$ and an $n^d$-space bounded DTM $M = (Q, \Sigma, \Gamma, \delta, q_0, q_+ q_-)$ such that $L(M) = L$. We construct in polynomial time for each input $w$ a QBF $\psi_w$ such that $M$ accepts $w$ iff $\psi_w$ is valid. Notice that $M$ may needs exponential time; thus, we cannot use the same construction as in Theorem 4.13 where we had different variables for each step made. Instead, we use the ideas from the proof of Theorem 3.9 (Savitch's). Recall that the proof was based on the predicate $Path(C,C',i)$ expressing that there is a path of length \emph{at most $2^i$} from $C$ to $C'$ in the configuration graph $G_M(n^d)$. 
+
+We can represent a configuration as a tuple of the following variables
+\begin{itemize}
+ \item $s_q$ for every $q \in Q$, describes the curren state
+ \item $T_{a,i}$ for every $a \in \Gamma$, $i \leq n^d$, describes the symbol on the $i$th tape cell
+ \item $H_i$ for every $i \leq n^d$, describes the position of the head
+\end{itemize}
+The following formula ensures that such a tuple $\bar{C}$ encodes a valid configuration:
+\begin{align*}
+ \psi_{\mathit{conf}}(\bar{C}) := {}& \bigvee_{q \in Q} S_q \land \bigwedge_{q, q' \in Q\colon q \neq q'} \neg (S_q \land S_{q'}) \land \\
+ & \bigvee_{i \leq n^d} H_i \land \bigwedge_{i, i' \leq n^d \colon i \neq i'} \neg (H_i \land H_{i'}) \land \\
+ & \bigwedge_{i \leq n^d} \left(\bigvee_{a \in \Gamma} T_{a,i} \land \bigwedge_{a, a' \in \Gamma \colon a \neq a'} \neg ( T_{a,i} \land T_{a', i}) \right)\\
+\end{align*}
+We describe the $Path(C,C',i)$ using the transitions of $M$, through the following formula (where $\leftarrow(i)$, $\downarrow(i)$ and $\rightarrow(i)$ are defined as in the proof of Theorem~4.13):
+\begin{align*}
+ \psi_{\mathit{next}}(\bar{C}, \bar{C}') := {}& \psi_{\mathit{conf}}(\bar{C}) \land \psi_{\mathit{conf}}(\bar{C}') \land {} \\
+ & \bigwedge_{i \leq n^d} \big( (H_i \to ( \bigwedge_{j \neq i, a \in \Gamma} ( T_{a,i} \iff T_{a,j}' ) \\
+ & \land \bigwedge_{\delta(q,a) = (q',a',D), D(i) \leq n^d} ( S_q \land T_{a,i} \implies (S_{q'} \land T_{a',i}' \land H_{D(i)}')) \big)
+\end{align*}
+We define $Path(C,C',\delta)$ inductively as follows:
+\[ \psi^0_{\mathit{reach}}(\bar{C},\bar{C}') = \psi_{\mathit{next}}(\bar{C},\bar{C}') \lor \psi_{\mathit{eq}}(\bar{C},\bar{C}') \]
+For $ i > 0$ we use quantifiers:
+\begin{align*}
+ \psi_{\mathit{reach}}^i(\bar{C},\bar{C}') := & \exists \bar{C}'' \forall \bar{K} \forall \bar{K}'.
+  \Big( \big( \psi_{\mathit{eq}}(\bar{C},\bar{K}) \land \psi_{\mathit{eq}}(\bar{C}'',\bar{K}')\big) \\
+  & \lor \big( \psi_{\mathit{eq}}(\bar{C}'', \bar{K}') \land \psi_{\mathit{eq}}(\bar{C}',\bar{K})\big)\Big) \implies 
+  \psi_{\mathit{reach}}^{i-1}(\bar{K},\bar{K}')
+\end{align*}
 
 \end{document}
 
