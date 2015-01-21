@@ -12,12 +12,16 @@
 % some commands
 \newcommand{\todo}[1]{{\colorbox{yellow}{\textbf{TODO:} #1}}}
 % abbriviations
-\newcommand{\NP}{\text{$\mathit{NP}$}}
-\newcommand{\Po}{\text{$\mathit{P}$}}
-\newcommand{\NSpace}{\text{$\mathit{NSpace}$}}
-\newcommand{\DTime}{\text{$\mathit{DTime}$}}
-\newcommand{\Space}{\text{$\mathit{Space}$}}
-\newcommand{\bigO}{\text{$\mathcal{O}$}}
+\newcommand{\NP}{\text{$\mathit{NP}$}\xspace}
+\newcommand{\Po}{\text{$\mathit{P}$}\xspace}
+\newcommand{\PSpace}{\text{$\mathit{PSpace}$}\xspace}
+\newcommand{\NSpace}{\text{$\mathit{NSpace}$}\xspace}
+\newcommand{\DTime}{\text{$\mathit{DTime}$}\xspace}
+\newcommand{\Space}{\text{$\mathit{Space}$}\xspace}
+\newcommand{\bigO}{\text{$\mathcal{O}$}\xspace}
+\newcommand{\FPT}{\text{$\mathit{FPT}$}\xspace}
+\newcommand{\pSAT}{\text{$\mathit{p\!-\!SAT}$}\xspace}
+\newcommand{\threeSAT}{\text{$\mathit{3\!SAT}$}\xspace}
 
 % def , lemmas, theorems, examples
 \newtheorem{definition}{Definition}[chapter]
@@ -442,7 +446,67 @@ One might have the impression that every problem in \NP is either in \Po or \NP-
 
 \begin{theorem}[Ladner's Theorem]If $\Po=\NP$, then there is a language $L\in\NP\setminus\Po$ that is not \NP-complete. \#
 \end{theorem}
-There is no known natural problem that falls in this category. A famous candidate is the graph isomorphism probm: given two graphs $G_1$ and $G_2$, is it possible to rename the nodes of $G_1$, such that $G_1=G_2$?
+There is no known natural problem that falls in this category. A famous candidate is the graph isomorphism probm: given two graphs $G_1$ and $G_2$, is it possible to rename the nodes of $G_1$, such that $G_1=G_2$?\\
+\todo{GAP 15. Jan - 19. January}
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\chapter{}
+\section{}\label{sec:}
+\subsection{20. January}
+\begin{theorem}[QBF is \PSpace-hard]
+
+\end{theorem}
+
+\begin{proof} ...We also need formulas $\psi_{input}^w(C)$ expressing that $C$ is the initial configuration on input $w$, and $\psi_{acc}(C)$ saying that $C$ is accepting [Exercise]. If $M$ is $n^d-space$ bounded, then it is $T(n)=2^{cn^d}$-time bounded for some $c \geq 1$. We build the formula
+\[\psi_w = \exists C \exists C'.(\psi_{input}^w(C) \land \psi_{acc}(C) \land \psi_{reach}^{c|w|^d}(C,C'))\]
+which can be easily transformed to a QBF
+\end{proof}
+Thus we have that QBF is \PSpace-complete. These are obviously many other \PSpace-complete problems. Typical examples include generalizations of games and problems from automata theory. For instance, given an $n\times n$ checker board, with some black and red kings positioned on it, deciding whether black has a winning strategy is \PSpace-hard.\\
+Restrictions to QBF yield problems that are complete for the classes $\Sigma_k^p$ and $\Pi_k^p$ of the polynomial hierarchy. If we abbreviate $\exists x_1\exists x_2\dots\exists x_n$ as $\exists \overline{X}$ and likewise for universal quantifiers, we can define a $\Sigma_k$-QBF as a QBF of the form
+\[ \exists \overline{X_1}\forall\overline{X_2}\dots Q_k\overline{X_k}.\varphi \]
+and a $\Pi_k$-QBF as a QBF of the form
+\[ \forall\overline{X_1}\exists\overline{X_2}\dots Q_k\overline{X_k}.\varphi \]
+In other words, the quantification consists of $k$ alternating blocks of $\exists$ and $\forall$ quantifiers, that start with $\exists(\Sigma_k)$ or $\forall(\Pi_k)$.
+
+\begin{theorem}For all $k \geq 1$, $\Sigma_k$-QBF is $\Sigma_k^p$-complete and $\Pi_k$-QBF is $\Pi_k^p$-complete.
+\end{theorem}
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\chapter{Parameterized Complexity}\label{sec:parameterized-complexity}
+The border between tractability and intractability is not very well established. Parameterized complexity attempts to provide a finer level of granularity between \Po and \NP. The idea is to identify the components (parameters) of the input that make a problem hard. If these parameters can be guaranteed to be small, then the problem can be solved efficiently. Formally, a parameterized problem is a set $P \subseteq \Sigma^* \times \Gamma^*$, where $\Sigma$ and $\Gamma$ are disjoint finite alphabets. For a pair $(w,p) \in \Sigma^* \times \Gamma^*$, we say that $w$ is the \textit{input} and $p$ is its \textit{parameter}. The problem is to decide whether a given pair $(w,p)$ belongs to $P$ or not.\\
+
+For simplicity we consider $\Gamma = \{0,1\}$, and the parameter a natural number (in binary), and focus on problems that are obtained from classical decision problems, by a (polynomially computable) \textit{parameterization function} $p: \Sigma^* \rightarrow \mathbb{N}$ that extracts the parameter from the input.
+\[ (L,p) = \{(w,k)\ |\ w \in L, k = p(w) \} \]
+With these simplifications, a parameterized problem does not differ from a decision problem, except that we know a property ($p(w)$) of the input. In the following a parameterized problem is such a pair $(L,p)$.
+
+\begin{example}Consider the language SAT. The parameterization function $p(\varphi) = |Var(\varphi)|$, that returns the number of propositional variables in $\varphi$, defines the parameterized problem
+\[p-SAT := \{(\varphi,k)\ |\ \varphi \text{ is a satisfiable propositional formula and } k=|Var(\varphi)|\}\]
+We already know that SAT is \NP-hard. However, if we restrict the formulae to have a fixed (constant) number of variables, then satisfiability can be decided in polynomial time. This is what is called a fixed-parameter tractable problem.
+\end{example}
+
+\begin{definition}[Fixed-parameter tractable]
+A parameterized problem $(L,p)$ is fixed-parameter tractable (fpt), if there is a computable function $f$, a $d \in \mathbb{N}$ and DTM that decides $L$ in at most $f(p(w))|w|^d$-steps. The class \FPT  contains all fpt problems.
+\end{definition}
+The function $f$ can grow arbitrarily fast. the only restriction is that the DTM is polynomially-time bounded by the length of the input (assuming a fixed parameter).
+
+\begin{theorem}[$\pSAT \in \FPT$]
+\end{theorem}
+
+\begin{proof}A simple algorithm for deciding satisfiability is to enumerate all $2^{|Var(\varphi)|}$ valuations of its variables, and check if any of them satisfies the formula. This algorithm needs
+\[ 2^{p(\varphi)}\bigO(|\varphi|)\text{-steps.}\]
+\end{proof}\noindent
+The choice of the right parameter is fundamental for fixed-parameter tractability. Consider the problem  $\pSAT = \{(\varphi,k)\ |\ \varphi\text{ is a satisfiable k-formula}\}$. If this problem is fit, then \threeSAT can be decided in time $f(3)|\varphi|^d$ for some $f$ and $d$. This implies $\Po = \NP$.
+
+\begin{example}Let $\Sigma$ be a finite alphabet, and $size: \Sigma^* \rightarrow \mathbb{N}$ be defined by $size(w) = |w|$ for all $w \in \Sigma^*$. For every decidable $L\subseteq \Sigma^*$ the problem $(L,size)$ is fpt. For every problem $L \in P$, and every parameterization $p$, $(L,p) \in \FPT$.
+\end{example}
+
+\begin{definition}[fpt-reduction] Let $(L,p)$ and $(L',p')$ be parameterization problems over $\Sigma$ and $\Sigma'$, respectively. And fpt-reduction from $(L,p)$ to $(L',p')$ is a mapping $R: \Sigma^* \rightarrow (\Sigma')^*$ such that:
+\begin{enumerate}
+\item $\forall w \in \Sigma^*$, $w \in L$ iff $R(w) \in L'$
+\item there exists a computable $f$, and $d \in \mathbb{N}$ sucht that $R(w)$ is computable in time $f(p(w))|w|^d$, and 
+\item there is a computable function $g: \mathbb{N} \rightarrow \mathbb{N}$ and $p'(R(w)) \leq g(p(w))$ for all $w \in \Sigma^*$
+\end{enumerate}
+\end{definition}
 
 \end{document}
 
