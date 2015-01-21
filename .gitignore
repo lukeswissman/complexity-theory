@@ -1,0 +1,14 @@
+# output files #
+################
+*.aux
+*.toc
+*.gz
+*.log
+*.bbl
+*.pdf
+*.out
+*.blg
+
+# OS stuff #
+################
+.DS_store
