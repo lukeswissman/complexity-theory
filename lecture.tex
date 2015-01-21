@@ -15,9 +15,11 @@
 \newcommand{\todo}[1]{{\colorbox{yellow}{\textbf{TODO:} #1}}}
 % abbriviations
 \newcommand{\NP}{\text{$\mathit{NP}$}\xspace}
+\newcommand{\coNP}{\text{$\mathit{coNP}$}\xspace}
 \newcommand{\Po}{\text{$\mathit{P}$}\xspace}
 \newcommand{\PSpace}{\text{$\mathit{PSpace}$}\xspace}
 \newcommand{\NSpace}{\text{$\mathit{NSpace}$}\xspace}
+\newcommand{\LogSpace}{\text{$\mathit{LogSpace}$}\xspace}
 \newcommand{\DTime}{\text{$\mathit{DTime}$}\xspace}
 \newcommand{\Space}{\text{$\mathit{Space}$}\xspace}
 \newcommand{\bigO}{\text{$\mathcal{O}$}\xspace}
@@ -175,7 +177,7 @@ On a general sense, complexity theory tries to understand the properties and rel
 \begin{theorem}[3.7]If $S$ is space constructible function, then $\NSpace(S) \subseteq \DTime(2^{\bigO(S)})$.
 \end{theorem}
 
-\paragraph{Proof}Take $L \in \NSpace(S)$ by Theorem \ref{}, there is an $S$-sapce bounded single-tape NTM $M$, with $L(M) = L$. We construct a DTM $M'$ that does the following on every input $w$ of length $n$:
+\begin{proof} Take $L \in \NSpace(S)$ by Theorem \ref{}, there is an $S$-sapce bounded single-tape NTM $M$, with $L(M) = L$. We construct a DTM $M'$ that does the following on every input $w$ of length $n$:
 \begin{itemize}
 \item[-] fine $S(n)$ by running(?) the DTM $M_S$, such that $\Space_M(w) = S(|w|)$ ($S$ is space constructible) on a separate tape,  the number of tape cells used in that tape gives a unitary(?) encoding of $S(n)$
 \item[-] construct the graph $G_M(S(n))$ as follows
@@ -190,8 +192,8 @@ From Theorem \ref{3.3} (Part 2), we know that $M_S$ runs in time at most $2^{\bi
 \item[i)]$G_M(S(n))$ is generated in time $2^{\bigO(s)}$, and 
 \item[ii)]at most $2^{\bigO(S(n))}$ reachability problems need to be solved to decide the language.
 \end{itemize}
-As we will show later that each reachability problem can be solved in polynomial time, this yields the desired time bound. $\#$\\
-
+As we will show later that each reachability problem can be solved in polynomial time, this yields the desired time bound. 
+\end{proof}
 
 %-----------------------------------------------------------------------------------------------------------------------------
 \section{asdf}
@@ -262,7 +264,7 @@ When defining complexity classes, we ignored multiplicative constants using the 
 Let $T: \mathbb{N} \rightarrow \mathbb{N}$, be such that $n \in o(T)$, $DTime(T) \subseteq DTime(max\{n,\ulcorner \epsilon*T\urcorner\})$ for every $\epsilon \in (0,1]$.
 \end{theorem}
 
-\paragraph{Proof} Let $L\in DTime(T)$ and $M$ a $k$-tape DTM deciding $L$ in time $T(n)$. We construct a $k+1$-tape TM $M'$ that works over the alphabet $\Gamma \cup \Gamma^m$, where $m$ is a constant that we will fix later. The idea is that $M'$  represents (and uses) $m>1$ symbols from $M$ in one symbol.\\
+\begin{proof} Let $L\in DTime(T)$ and $M$ a $k$-tape DTM deciding $L$ in time $T(n)$. We construct a $k+1$-tape TM $M'$ that works over the alphabet $\Gamma \cup \Gamma^m$, where $m$ is a constant that we will fix later. The idea is that $M'$  represents (and uses) $m>1$ symbols from $M$ in one symbol.\\
 For example, if $m=2$ ...This not only saves space, but allows $M'$ to execute many steps from $M$ in only one step. A computation on $M'$ looks as follows:
 \begin{itemize}
 \item[-] $M'$ first copies the input of $M$ into the new tape, compressing $m$ symbols of $\Sigma$ into one of $\Sigma^m$, and takes the head back to the beginning of the tape. This needs $n+\ulcorner \sfrac{n}{m} \urcorner$ steps.
@@ -286,7 +288,8 @@ n+\frac{n}{m}+\frac{8T(n)}{m}+9 &\leq &2n + \frac{n}{m} + 8 \frac{T(n)}{m}\\
 \]
 Pick $m$ such that $\epsilon*m\geq11$. Then 
 \[ T(n) * \sfrac{11}{m} \leq \epsilon*T(n)\]
-Thus, $M'$ is $\ulcorner\epsilon*(Tn)\urcorner$-bounded for every input of length $\geq n_0$. These are only finitely many inputs (with length $n\leq n_0$) for which this bound might not work. Since they are finitely many, they can be hardcoded in the translation: the machine reads the whole input and immediately accepts or rejects these words. Overall, the machine has a runtime bounded by  $max\{n, \ulcorner\epsilon*T\urcorner\}$. \#\\
+Thus, $M'$ is $\ulcorner\epsilon*(Tn)\urcorner$-bounded for every input of length $\geq n_0$. These are only finitely many inputs (with length $n\leq n_0$) for which this bound might not work. Since they are finitely many, they can be hardcoded in the translation: the machine reads the whole input and immediately accepts or rejects these words. Overall, the machine has a runtime bounded by  $max\{n, \ulcorner\epsilon*T\urcorner\}$.
+\end{proof}
 
 This theorem show that if a TM runs in super linear time $c*f(n)$, then this $c$ can be made arbitrarily small. This justifies the use of the $\mathcal{O}$ notation, and our definition of $P$ in terms of polynomials of the form $n^d$: $9n^2 + \sfrac{5}{n} + 3 \leq 63n^2$, and by the Theorem \ref{thm:speedup}, this coefficient can be reduced to 1.
 
@@ -314,7 +317,8 @@ The symbols are also represented using natural numbers. We can then use their bi
 $H \not\in P$.
 \end{lemma}
 
-\paragraph{Proof} Assume that  $H \in P$. By Theorem 2.3, there is a DTM $M_H$ such that $L(M_H)=H$ and $M_H$ is $n^d$-time bounded for some $d \in \mathbb{N}$. Assume w.l.o.g. that $d \geq 2$. We construct a new DTM $D$ that first duplicates its input $w$ to $w;w$ and then behaves as $M_H$.
+\begin{proof} Assume that  $H \in P$. By Theorem 2.3, there is a DTM $M_H$ such that $L(M_H)=H$ and $M_H$ is $n^d$-time bounded for some $d \in \mathbb{N}$. Assume w.l.o.g. that $d \geq 2$. We construct a new DTM $D$ that first duplicates its input $w$ to $w;w$ and then behaves as $M_H$.
+\end{proof}
 
 \begin{definition}
 Let $L\subseteq\Sigma^*$. A relation $R\subseteq\Sigma^* \times \Gamma^*$ is a proof relation for L iff:
@@ -333,9 +337,10 @@ For example, $\mathrm{CLIQUE}$ has the polytime verifiable proof relation $\{((G
 \begin{theorem}For every $L\subseteq\Sigma^*$, $L\in NP$ iff $L$ has a polytime verifiable proof relation.
 \end{theorem}
 
-\paragraph{Proof}[if] If $R$ is a polytime verifiable proof relation for $L$ with bound $|w|^k$ on the proof length,  then a polynomial time bounded NTM can decide $L$ by guessing a $\rho\in\Gamma^*$ of length at most $|w|^k$ and checking in polynomial time, if $(w,\rho)\in R$.
+\begin{proof} [if] If $R$ is a polytime verifiable proof relation for $L$ with bound $|w|^k$ on the proof length,  then a polynomial time bounded NTM can decide $L$ by guessing a $\rho\in\Gamma^*$ of length at most $|w|^k$ and checking in polynomial time, if $(w,\rho)\in R$.
 
-[only if] If $L\in NP$, then there exists a NTM $M$ that decided $L$ in time $n^k$ for some $k\in\mathbb{N}$. Define the relation $R$ as follows: $(w,\rho)\in R$ off $\rho$ is the encoding of an accepting computation of $M$ on input $w$. Clearly $R$ is a proof relation for $L$. Since $M$ runs in polynomial time, and it is possible to check in polynomial time whether a sequence of configurations is an accepting computation of a NTM, $R$ is polytime verifiable. $\#$\\
+[only if] If $L\in NP$, then there exists a NTM $M$ that decided $L$ in time $n^k$ for some $k\in\mathbb{N}$. Define the relation $R$ as follows: $(w,\rho)\in R$ off $\rho$ is the encoding of an accepting computation of $M$ on input $w$. Clearly $R$ is a proof relation for $L$. Since $M$ runs in polynomial time, and it is possible to check in polynomial time whether a sequence of configurations is an accepting computation of a NTM, $R$ is polytime verifiable. 
+\end{proof}
 
 This Theorem states that a problem is in $NP$, iff ``yes'' instance has a short proof that can be verified efficiently. Notice in particular, that this definition does not require NTMs.
 
@@ -352,9 +357,10 @@ The idea is that if $L\leq_\rho L'$, then a decision procedure for $L'$ can be u
 
 \begin{lemma} Let $C \in \{P,NP,PSpace,ExpTime,NExpTime,ExpSpace\}$. If $L\leq_\rho L'$ and $L'\in C$, then $L \in C$.
 \end{lemma}
-\paragraph{Proof} ($C=P$) Since $L\leq_\rho L'$, there exists a function $f$ sucht that $w\in L$ off $f(w)\in L'$, and a $n^d$-time bounded DTM $N$ that computes $f$. $L'\in P$ implies that there is a $n^{d'}$-time bounded DTM $M$ that decides $L'$. We can decide $L$ by a $(n^d)^{d'}$-time bounded DTM by running $M$ after $N$. The other classes are analogues. $\#$\\
+\begin{proof} ($C=P$) Since $L\leq_\rho L'$, there exists a function $f$ sucht that $w\in L$ off $f(w)\in L'$, and a $n^d$-time bounded DTM $N$ that computes $f$. $L'\in P$ implies that there is a $n^{d'}$-time bounded DTM $M$ that decides $L'$. We can decide $L$ by a $(n^d)^{d'}$-time bounded DTM by running $M$ after $N$. The other classes are analogues.
+\end{proof}
 
-For $LogSpace$, this Lemma does not hold. In that case we need a logspace-reduction which should be computable in logarithmic space.
+For \LogSpace, this Lemma does not hold. In that case we need a logspace-reduction which should be computable in logarithmic space.
 
 \begin{definition}Let $C\in\{P,NP,PSpace,ExpTime,NExpTime,ExpSpace\}$. $L'$ is $C$-hard, if for all $L\in C$ we have $L\leq_\rho L'$. It is $C$-complete if it is $C$-hard and in $C$.
 \end{definition}
@@ -363,7 +369,7 @@ For the classes $P$ and $LogSpace$, hardness is defined in herms of logspace red
 
 \begin{theorem}[Cook,Levin] $\mathrm{SAT}$ is $NP$-complete.
 \end{theorem}
-\paragraph{Proof} The problem is clearly in $NP$: given $\varphi$, guess truth assignment for the variables in $\varphi$ (polynomial many) and check whether it satisfies the formula. We need to show that it is $NP$-hard, i.e.\ $L\leq_\rho \mathrm{SAT}$ for all $L \in NP$. Let $L$ be an arbitrary problem in $NP$. Then, there exists a (1-tape) NTM $M$ and $k\geq 0$ such that $L(M)=L$ and $M$ is $n^k$-time bounded. We show how to construct in polynomial time, for every input $w$ of $M$ a propositional formula $\varphi_w$ such that $\varphi_w$ is satisfiable iff $M$ accepts $w$. The idea is to construct a formula that describes the accepting computations of $M$ on $w$. One such computation can be seen as a matrix:
+\begin{proof} The problem is clearly in $NP$: given $\varphi$, guess truth assignment for the variables in $\varphi$ (polynomial many) and check whether it satisfies the formula. We need to show that it is $NP$-hard, i.e.\ $L\leq_\rho \mathrm{SAT}$ for all $L \in NP$. Let $L$ be an arbitrary problem in $NP$. Then, there exists a (1-tape) NTM $M$ and $k\geq 0$ such that $L(M)=L$ and $M$ is $n^k$-time bounded. We show how to construct in polynomial time, for every input $w$ of $M$ a propositional formula $\varphi_w$ such that $\varphi_w$ is satisfiable iff $M$ accepts $w$. The idea is to construct a formula that describes the accepting computations of $M$ on $w$. One such computation can be seen as a matrix:
 \[
 \begin{array}{c|c|c|c|c|c|c}
 q_0,a_0 & a_1 & \dots & q_n & \sqcup & \dots & \sqcup\\
@@ -397,7 +403,8 @@ Finally, we use an auxiliary formula to ensure that the state and labelings are 
 \]
 the $M$ accepts $w$ iff
 \[\varphi_w := \varphi_{ini} \land \varphi_{move} \land \varphi_{keep} \land \varphi_{acc} \land \varphi_{aux}\]
-is satisfiable (exercise) $\#$\\
+is satisfiable [Exercise].
+\end{proof}
 
 Knowing an $NP$-hard problem is helpful for proving $NP$-hardness of other problems.
 
@@ -411,7 +418,7 @@ is a $3$-formula.
 \begin{theorem}$\mathsf{3SAT}$ is $NP$-complete.
 \end{theorem}
 
-\paragraph{Proof} $\mathsf{3SAT}$ is a special case of $\mathsf{SAT}$, and hence also in $NP$.
+\begin{proof} \threeSAT is a special case of $\mathsf{SAT}$, and hence also in $NP$.\\
 
 To prove hardness we give a polynomial reduction from $\mathsf{SAT}$ to $\mathsf{3SAT}$. Let $\varphi$ be a propositional formula. We transform it into $\mathsf{nnf}(\varphi)=\varphi'$ in polynomial time. Let $\Gamma$ be the set of all sub formulas of $\varphi'$ (including $\varphi'$). The cardinality of $\Gamma$ is bounded by the length of $\varphi'$ (at most one sub formula for every position in $\varphi'$). Define a substation function $s$ that replaces all non-literal formulas $\sigma \in \Gamma$ with a fresh variable $\rho\sigma$
 \[
@@ -421,104 +428,46 @@ Set
 \[
 \psi := \bigwedge_{\sigma = \eta \land \chi \in \Gamma} (\rho_\sigma \leftrightarrow (s(\eta) \land s(\chi))) \land \bigwedge_{\sigma = \eta\lor\chi\in\Gamma}(\rho_\sigma \leftrightarrow (s(\eta) \lor s(\chi))).
 \]
-$\varphi$ is satisfiable off $\psi\land\rho_{\varphi'}$ is satisfiable, and the latter can be constructed in polynomial time. We now show how to transform the formulas $l_1 \leftrightarrow l_2 \land l_3$ and $l_1 \leftrightarrow l_2 \lor l_3$, where $l_i$ are literals, into 3-formulas. $l_1 \leftrightarrow (l_2 \land l_3) \leadsto (\neg l_1 \lor (l_2 \land l_3)) \land (\neg(l_2\land l_3)\lor l_1) \leadsto (\neg l_1 \lor l_2) \land (\neg l_1 \lor l_3) \land (\neg l_2 \lor \neg l_3 \lor l_1) \leadsto (\neg l_1 \lor l_2 \lor x) \land (\neg l_1 \lor l_2 \lor \neg x) \land (\neg l_1 \lor l_3 \lor y) \land (\neg l_1 \lor l_3 \lor \neg y) \land (\neg l_2 \lor \neg l_3 \lor l_1)$, where $x$ and $y$ are new variables. the case for disjunction is analogous. \#\\
+$\varphi$ is satisfiable off $\psi\land\rho_{\varphi'}$ is satisfiable, and the latter can be constructed in polynomial time. We now show how to transform the formulas $l_1 \leftrightarrow l_2 \land l_3$ and $l_1 \leftrightarrow l_2 \lor l_3$, where $l_i$ are literals, into 3-formulas. $l_1 \leftrightarrow (l_2 \land l_3) \leadsto (\neg l_1 \lor (l_2 \land l_3)) \land (\neg(l_2\land l_3)\lor l_1) \leadsto (\neg l_1 \lor l_2) \land (\neg l_1 \lor l_3) \land (\neg l_2 \lor \neg l_3 \lor l_1) \leadsto (\neg l_1 \lor l_2 \lor x) \land (\neg l_1 \lor l_2 \lor \neg x) \land (\neg l_1 \lor l_3 \lor y) \land (\neg l_1 \lor l_3 \lor \neg y) \land (\neg l_2 \lor \neg l_3 \lor l_1)$, where $x$ and $y$ are new variables. the case for disjunction is analogous.
+\end{proof}
 
 We can now show that $\mathsf{CLIQUE}$ is also $NP$-hard.
 
 \begin{theorem} $\mathsf{CLIQUE}$ is $NP$-complete.
 \end{theorem}
 
-\paragraph{Proof} We show $\mathsf{3SAT} \leq_\rho \mathsf{CLIQUE}$. Let $\varphi = (l_{1,1} \lor l_{1,2} \lor l_{1,3}) \land \dots \land (l_{k,1} \lor l_{k,2} \lor l_{k,3})$ be a 3-formula. We define a graph $G_\varphi = (V,E)$, where:
+\begin{proof} We show $\mathsf{3SAT} \leq_\rho \mathsf{CLIQUE}$. Let $\varphi = (l_{1,1} \lor l_{1,2} \lor l_{1,3}) \land \dots \land (l_{k,1} \lor l_{k,2} \lor l_{k,3})$ be a 3-formula. We define a graph $G_\varphi = (V,E)$, where:
 \begin{itemize}
 \item[-] $V = \{ <i,j>\;|\;1\leq i \leq k, 1\leq j \leq 3\}$
 \item[-] $E = \{\{<i,j>,\;<i',j'>\}\;|\;i\neq i', \text{and }l_{i,j} \text{ does not contradict }l_{i',j'}\}$
 \end{itemize}
 We show that $\varphi$ is satisfiable iff $G_\varphi$ has a $k$-clique.\\
 \textbf{(only if)} If $\varphi$ is satisfiable, then there is a truth assignment that makes at least one literal of every clause true. Select one of these from every clause, obtaining a set of $W\subseteq V$. Since there are $k$ clauses, we have $|W| = k$. For each $<i,j>\neq<i',j'> \in W$ by construction $i\neq i'$ and since they are satisfiable by the same valuation, $l_{i,j}$ cannot contradict $l_{i',j'}$. Thus $W$ is a $k$-clique.\\
-\textbf{(if)} Let $W \subseteq V$ be a $k$-clique of $G_\varphi$, and $O$ the set of associated literals. Since $W$ is a clique, the literals in $O$ do not contradict each other, and we can build a truth assignment $t$ that makes them all true. Additionally, there are no pairs of nodes in $W$ representing literals from the same clause. Since $W$ is of size $k$, $O$ contains a  literal for each clause and thus $t$ satisfies $\varphi$ \#\\
+\textbf{(if)} Let $W \subseteq V$ be a $k$-clique of $G_\varphi$, and $O$ the set of associated literals. Since $W$ is a clique, the literals in $O$ do not contradict each other, and we can build a truth assignment $t$ that makes them all true. Additionally, there are no pairs of nodes in $W$ representing literals from the same clause. Since $W$ is of size $k$, $O$ contains a  literal for each clause and thus $t$ satisfies $\varphi$.
+\end{proof}
 
 There are many other $NP$-complete problems. This class is helpful for understanding the relationship between $P$ and $NP$. It is generally believed that $P \neq NP$, but it has not been proven. To prove the contrary, it would suffice to find a polynomial time algorithm for \underline{any} $NP$-hard problem.
 
 \begin{theorem}If there is a \NP-hard problem in \Po, then $\Po=\NP$.
 \end{theorem}
 
-\paragraph{Proof}Let $L$ be \NP-hard and in \Po, and let $L' \in \NP$. Since $L$ is \NP-hard $L' \leq_\rho L \in \Po$. Thus $L' \in \Po$ (Lemma 4.7) \#\\
+\begin{proof} Let $L$ be \NP-hard and in \Po, and let $L' \in \NP$. Since $L$ is \NP-hard $L' \leq_\rho L \in \Po$. Thus $L' \in \Po$ (Lemma 4.7).
+\end{proof}
 
 One might have the impression that every problem in \NP is either in \Po or \NP-hard. This is only true if $\Po=\NP$.
 
 \begin{theorem}[Ladner's Theorem]If $\Po=\NP$, then there is a language $L\in\NP\setminus\Po$ that is not \NP-complete. \#
 \end{theorem}
-There is no known natural problem that falls in this category. A famous candidate is the graph isomorphism probm: given two graphs $G_1$ and $G_2$, is it possible to rename the nodes of $G_1$, such that $G_1=G_2$?\\
-\todo{GAP 15. Jan - 19. January}
+There is no known natural problem that falls in this category. A famous candidate is the graph isomorphism probm: given two graphs $G_1$ and $G_2$, is it possible to rename the nodes of $G_1$, such that $G_1=G_2$?
 
 %-----------------------------------------------------------------------------------------------------------------------------
-\chapter{}
-\section{}\label{sec:}
-\subsection{20. January}
-\begin{theorem}[QBF is \PSpace-hard]
+\chapter{The Polynomial Hierarchy and $PSpace$}\label{sec:polynomial-hierarchy}
 
-\end{theorem}
-
-\begin{proof} ...We also need formulas $\psi_{input}^w(C)$ expressing that $C$ is the initial configuration on input $w$, and $\psi_{acc}(C)$ saying that $C$ is accepting [Exercise]. If $M$ is $n^d-space$ bounded, then it is $T(n)=2^{cn^d}$-time bounded for some $c \geq 1$. We build the formula
-\[\psi_w = \exists C \exists C'.(\psi_{input}^w(C) \land \psi_{acc}(C) \land \psi_{reach}^{c|w|^d}(C,C'))\]
-which can be easily transformed to a QBF
-\end{proof}
-Thus we have that QBF is \PSpace-complete. These are obviously many other \PSpace-complete problems. Typical examples include generalizations of games and problems from automata theory. For instance, given an $n\times n$ checker board, with some black and red kings positioned on it, deciding whether black has a winning strategy is \PSpace-hard.\\
-Restrictions to QBF yield problems that are complete for the classes $\Sigma_k^p$ and $\Pi_k^p$ of the polynomial hierarchy. If we abbreviate $\exists x_1\exists x_2\dots\exists x_n$ as $\exists \overline{X}$ and likewise for universal quantifiers, we can define a $\Sigma_k$-QBF as a QBF of the form
-\[ \exists \overline{X_1}\forall\overline{X_2}\dots Q_k\overline{X_k}.\varphi \]
-and a $\Pi_k$-QBF as a QBF of the form
-\[ \forall\overline{X_1}\exists\overline{X_2}\dots Q_k\overline{X_k}.\varphi \]
-In other words, the quantification consists of $k$ alternating blocks of $\exists$ and $\forall$ quantifiers, that start with $\exists(\Sigma_k)$ or $\forall(\Pi_k)$.
-
-\begin{theorem}For all $k \geq 1$, $\Sigma_k$-QBF is $\Sigma_k^p$-complete and $\Pi_k$-QBF is $\Pi_k^p$-complete.
-\end{theorem}
-
-%-----------------------------------------------------------------------------------------------------------------------------
-\chapter{Parameterized Complexity}\label{sec:parameterized-complexity}
-The border between tractability and intractability is not very well established. Parameterized complexity attempts to provide a finer level of granularity between \Po and \NP. The idea is to identify the components (parameters) of the input that make a problem hard. If these parameters can be guaranteed to be small, then the problem can be solved efficiently. Formally, a parameterized problem is a set $P \subseteq \Sigma^* \times \Gamma^*$, where $\Sigma$ and $\Gamma$ are disjoint finite alphabets. For a pair $(w,p) \in \Sigma^* \times \Gamma^*$, we say that $w$ is the \textit{input} and $p$ is its \textit{parameter}. The problem is to decide whether a given pair $(w,p)$ belongs to $P$ or not.\\
-
-For simplicity we consider $\Gamma = \{0,1\}$, and the parameter a natural number (in binary), and focus on problems that are obtained from classical decision problems, by a (polynomially computable) \textit{parameterization function} $p: \Sigma^* \rightarrow \mathbb{N}$ that extracts the parameter from the input.
-\[ (L,p) = \{(w,k)\ |\ w \in L, k = p(w) \} \]
-With these simplifications, a parameterized problem does not differ from a decision problem, except that we know a property ($p(w)$) of the input. In the following a parameterized problem is such a pair $(L,p)$.
-
-\begin{example}Consider the language SAT. The parameterization function $p(\varphi) = |Var(\varphi)|$, that returns the number of propositional variables in $\varphi$, defines the parameterized problem
-\[p-SAT := \{(\varphi,k)\ |\ \varphi \text{ is a satisfiable propositional formula and } k=|Var(\varphi)|\}\]
-We already know that SAT is \NP-hard. However, if we restrict the formulae to have a fixed (constant) number of variables, then satisfiability can be decided in polynomial time. This is what is called a fixed-parameter tractable problem.
-\end{example}
-
-\begin{definition}[Fixed-parameter tractable]
-A parameterized problem $(L,p)$ is fixed-parameter tractable (fpt), if there is a computable function $f$, a $d \in \mathbb{N}$ and DTM that decides $L$ in at most $f(p(w))|w|^d$-steps. The class \FPT  contains all fpt problems.
-\end{definition}
-The function $f$ can grow arbitrarily fast. the only restriction is that the DTM is polynomially-time bounded by the length of the input (assuming a fixed parameter).
-
-\begin{theorem}[$\pSAT \in \FPT$]
-\end{theorem}
-
-\begin{proof}A simple algorithm for deciding satisfiability is to enumerate all $2^{|Var(\varphi)|}$ valuations of its variables, and check if any of them satisfies the formula. This algorithm needs
-\[ 2^{p(\varphi)}\bigO(|\varphi|)\text{-steps.}\]
-\end{proof}\noindent
-The choice of the right parameter is fundamental for fixed-parameter tractability. Consider the problem  $\pSAT = \{(\varphi,k)\ |\ \varphi\text{ is a satisfiable k-formula}\}$. If this problem is fit, then \threeSAT can be decided in time $f(3)|\varphi|^d$ for some $f$ and $d$. This implies $\Po = \NP$.
-
-\begin{example}Let $\Sigma$ be a finite alphabet, and $size: \Sigma^* \rightarrow \mathbb{N}$ be defined by $size(w) = |w|$ for all $w \in \Sigma^*$. For every decidable $L\subseteq \Sigma^*$ the problem $(L,size)$ is fpt. For every problem $L \in P$, and every parameterization $p$, $(L,p) \in \FPT$.
-\end{example}
-
-\begin{definition}[fpt-reduction] Let $(L,p)$ and $(L',p')$ be parameterization problems over $\Sigma$ and $\Sigma'$, respectively. And fpt-reduction from $(L,p)$ to $(L',p')$ is a mapping $R: \Sigma^* \rightarrow (\Sigma')^*$ such that:
-\begin{enumerate}
-\item $\forall w \in \Sigma^*$, $w \in L$ iff $R(w) \in L'$
-\item there exists a computable $f$, and $d \in \mathbb{N}$ sucht that $R(w)$ is computable in time $f(p(w))|w|^d$, and 
-\item there is a computable function $g: \mathbb{N} \rightarrow \mathbb{N}$ and $p'(R(w)) \leq g(p(w))$ for all $w \in \Sigma^*$
-\end{enumerate}
-\end{definition}
-
-%-----------------------------------------------------------------------------------------------------------------------------
-
-\chapter{The Polynomial Hierarchy and $PSpace$}
-
-There is a finer level of detail between $\Po$ and $PSpace$ then just $\NP$ and $co\NP$ If $\Po \neq \NP$, there is a hierarchy of complexity classes; defined with the help of \emph{oracle} TMs. 
+There is a finer level of detail between $\Po$ and \PSpace then just \NP and \coNP. If $\Po \neq \NP$, there is a hierarchy of complexity classes; defined with the help of \emph{oracle} TMs. 
 
 \begin{definition} An \emph{oracle} is a language $O \subseteq \Sigma^*$. An \emph{oracle TM $M^O$} is a (deterministic or nondeterministic) TM extended with an oracle $O$. This machine has an additional \emph{oracle tape} and distinguished states $q_?$, $q_f$ and $q_t$. For all states except $q_?$ transitions are defined as usual. If $M^O$ enters state $q_?$, then the next state is $q_t$ if the word in the oracle tape belongs to $O$, and $q_f$ otherwise. This transition requires only one step and does not change the head positions or tape contents. 
 \end{definition}
-Intuitively, an oracle TM $MW*$ has an auxiliary subprocedure deciding $O$ as a ``black box''. The time and space used by this subprocedure is not counted as resources of $M^O$. Notice that $O$ does not even need to be decidable!
+Intuitively, an oracle TM $MW^*$ has an auxiliary subprocedure deciding $O$ as a ``black box''. The time and space used by this subprocedure is not counted as resources of $M^O$. Notice that $O$ does not even need to be decidable!
 
 \begin{definition} \mbox{}
 \begin{itemize}
@@ -530,7 +479,7 @@ Intuitively, an oracle TM $MW*$ has an auxiliary subprocedure deciding $O$ as a 
 \end{definition}
 For example, $L \in \Po^\NP$ if there is a polytime-bounded oracle DTM $M^O$, such that $O \in \NP$ and $L(M^O) = L$. Notice that $\Po^\Po = P$. One can simpley combine the oracle TM $M^O$ with a polytime-bounded DTM $M$ for $O$ into a new machine $N$. 
 
-This idea \emph{cannot} be used to show e.g.\ that $\NP = \Po^{\NP}$ to ensure that the new machine should switch to $q_f$, a single computation of $N$ would have to analyse all computations of $M$. 
+This idea \emph{cannot} be used to show e.g.\ that $\NP = \Po^{\NP}$ to ensure that the new machine should switch to $q_f$, a single computation of $N$ would have to analyze all computations of $M$. 
 
 \begin{definition} We inductively define the complexity classes $\Sigma_k^\Po$, $\Pi_k^\Po$ and $\Delta_k^\Po$, for $k \geq 0$, as follows:
 \begin{itemize}
@@ -585,8 +534,8 @@ For (\ref{enum:check_minimality}), it simply calls an oracle for non-minimality 
 
 It is also possible to show that the problem is $\Pi_2^\Po$-hard. The important consideration in this case is that before accepting or rejecting one must guess a \emph{minimal} model. This usually requires an internal minimality check ($\NP$-oracle). In fact, this kind of situations are commonly found in \emph{non-monotonic} logics, where reasoning is complete for different classes in the polynomial hierarchy. 
 
-\section*{$PSpace$}
-Just as SAT is the typical $\NP$-complete problem, validity of \emph{quantified Boolean formualas} (QBF) is a well-known $PSpace$-complete problem. 
+\section*{\PSpace}
+Just as SAT is the typical $\NP$-complete problem, validity of \emph{quantified boolean formulas} (QBF) is a well-known \PSpace-complete problem. 
 
 \begin{definition} A quantified Boolean formula (QBF) is an expression of the form 
 \[ Q_1p_1.Q_2p_2. \ldots Q_np_n.\varphi \]
@@ -671,18 +620,17 @@ Consider for example the QBF $\psi = \forall p_1.\exists p_2. \forall p_3. p_1 \
 \caption{Each level corresponds to a quantifier, $\forall$-levels use $\land$-branching and $\exists$-levels use $\lor$-branching. }
 \end{figure}
 
-\begin{theorem} $QBF$ is in $PSpace$.
+\begin{theorem} $QBF$ is in \PSpace.
 \end{theorem}
 (Proof: a depth-first traversal over the and-or tree can be done in $PSpace$.)
 
 Notice that $QBF$ is $\NP$-hard: a propositional formula $\varphi$ is satisfiable iff $\exists p_1. \ldots \exists p_n.\varphi$ is valid (where $p_1,\ldots, p_n$ ar ethe variables in $\varphi$). Similarly, $QBF$ is co-$NP$-hard ($\forall p_1. \ldots \forall p_n.\varphi$ encodes validity of $\varphi$.) Actually it is $PSpace$-hard. 
 
-\begin{theorem} $QBF$ is $PSpace$-hard.
+\begin{theorem} $QBF$ is \PSpace-hard.
 \end{theorem}
 
-\paragraph{Proof} Let $L \in PSpace$, then there exists a $d \geq 0$ and an $n^d$-space bounded DTM $M = (Q, \Sigma, \Gamma, \delta, q_0, q_+ q_-)$ such that $L(M) = L$. We construct in polynomial time for each input $w$ a QBF $\psi_w$ such that $M$ accepts $w$ iff $\psi_w$ is valid. Notice that $M$ may needs exponential time; thus, we cannot use the same construction as in Theorem 4.13 where we had different variables for each step made. Instead, we use the ideas from the proof of Theorem 3.9 (Savitch's). Recall that the proof was based on the predicate $Path(C,C',i)$ expressing that there is a path of length \emph{at most $2^i$} from $C$ to $C'$ in the configuration graph $G_M(n^d)$. 
-
-We can represent a configuration as a tuple of the following variables
+\begin{proof}
+Let $L \in PSpace$, then there exists a $d \geq 0$ and an $n^d$-space bounded DTM $M = (Q, \Sigma, \Gamma, \delta, q_0, q_+ q_-)$ such that $L(M) = L$. We construct in polynomial time for each input $w$ a QBF $\psi_w$ such that $M$ accepts $w$ iff $\psi_w$ is valid. Notice that $M$ may needs exponential time; thus, we cannot use the same construction as in Theorem 4.13 where we had different variables for each step made. Instead, we use the ideas from the proof of Theorem 3.9 (Savitch's). Recall that the proof was based on the predicate $Path(C,C',i)$ expressing that there is a path of length \emph{at most $2^i$} from $C$ to $C'$ in the configuration graph $G_M(n^d)$. We can represent a configuration as a tuple of the following variables
 \begin{itemize}
  \item $s_q$ for every $q \in Q$, describes the curren state
  \item $T_{a,i}$ for every $a \in \Gamma$, $i \leq n^d$, describes the symbol on the $i$th tape cell
@@ -709,6 +657,58 @@ For $ i > 0$ we use quantifiers:
   & \lor \big( \psi_{\mathit{eq}}(\bar{C}'', \bar{K}') \land \psi_{\mathit{eq}}(\bar{C}',\bar{K})\big)\Big) \implies 
   \psi_{\mathit{reach}}^{i-1}(\bar{K},\bar{K}')
 \end{align*}
+We also need formulas $\psi_{input}^w(\bar{C})$ expressing that $\bar{C}$ is the initial configuration on input $w$, and $\psi_{acc}(\bar{C})$ saying that $\bar{C}$ is accepting [Exercise]. If $M$ is $n^d-space$ bounded, then it is $T(n)=2^{cn^d}$-time bounded for some $c \geq 1$. We build the formula
+\[\psi_w = \exists \bar{C} \exists \bar{C'}.(\psi_{input}^w(\bar{C}) \land \psi_{acc}(\bar{C}) \land \psi_{reach}^{c|w|^d}(\bar{C},\bar{C'}))\]
+which can be easily transformed to a QBF.
+\end{proof}
+
+Thus we have that QBF is \PSpace-complete. These are obviously many other \PSpace-complete problems. Typical examples include generalizations of games and problems from automata theory. For instance, given an $n\times n$ checker board, with some black and red kings positioned on it, deciding whether black has a winning strategy is \PSpace-hard.\\
+Restrictions to QBF yield problems that are complete for the classes $\Sigma_k^p$ and $\Pi_k^p$ of the polynomial hierarchy. If we abbreviate $\exists x_1\exists x_2\dots\exists x_n$ as $\exists \bar{X}$ and likewise for universal quantifiers, we can define a $\Sigma_k$-QBF as a QBF of the form
+\[ \exists \bar{X_1}\forall\bar{X_2}\dots Q_k\bar{X_k}.\varphi \]
+and a $\Pi_k$-QBF as a QBF of the form
+\[ \forall\bar{X_1}\exists\bar{X_2}\dots Q_k\bar{X_k}.\varphi \]
+In other words, the quantification consists of $k$ alternating blocks of $\exists$ and $\forall$ quantifiers, that start with $\exists(\Sigma_k)$ or $\forall(\Pi_k)$.
+
+\begin{theorem}For all $k \geq 1$, $\Sigma_k$-QBF is $\Sigma_k^p$-complete and $\Pi_k$-QBF is $\Pi_k^p$-complete.
+\end{theorem}
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\chapter{Parameterized Complexity}\label{sec:parameterized-complexity}
+The border between tractability and intractability is not very well established. Parameterized complexity attempts to provide a finer level of granularity between \Po and \NP. The idea is to identify the components (parameters) of the input that make a problem hard. If these parameters can be guaranteed to be small, then the problem can be solved efficiently. Formally, a parameterized problem is a set $P \subseteq \Sigma^* \times \Gamma^*$, where $\Sigma$ and $\Gamma$ are disjoint finite alphabets. For a pair $(w,p) \in \Sigma^* \times \Gamma^*$, we say that $w$ is the \textit{input} and $p$ is its \textit{parameter}. The problem is to decide whether a given pair $(w,p)$ belongs to $P$ or not.\\
+
+For simplicity we consider $\Gamma = \{0,1\}$, and the parameter a natural number (in binary), and focus on problems that are obtained from classical decision problems, by a (polynomially computable) \textit{parameterization function} $p: \Sigma^* \rightarrow \mathbb{N}$ that extracts the parameter from the input.
+\[ (L,p) = \{(w,k)\ |\ w \in L, k = p(w) \} \]
+With these simplifications, a parameterized problem does not differ from a decision problem, except that we know a property ($p(w)$) of the input. In the following a parameterized problem is such a pair $(L,p)$.
+
+\begin{example}Consider the language SAT. The parameterization function $p(\varphi) = |Var(\varphi)|$, that returns the number of propositional variables in $\varphi$, defines the parameterized problem
+\[p-SAT := \{(\varphi,k)\ |\ \varphi \text{ is a satisfiable propositional formula and } k=|Var(\varphi)|\}\]
+We already know that SAT is \NP-hard. However, if we restrict the formulae to have a fixed (constant) number of variables, then satisfiability can be decided in polynomial time. This is what is called a fixed-parameter tractable problem.
+\end{example}
+
+\begin{definition}[Fixed-parameter tractable]
+A parameterized problem $(L,p)$ is fixed-parameter tractable (fpt), if there is a computable function $f$, a $d \in \mathbb{N}$ and DTM that decides $L$ in at most $f(p(w))|w|^d$-steps. The class \FPT  contains all fpt problems.
+\end{definition}
+The function $f$ can grow arbitrarily fast. the only restriction is that the DTM is polynomially-time bounded by the length of the input (assuming a fixed parameter).
+
+\begin{theorem}[$\pSAT \in \FPT$]
+\end{theorem}
+
+\begin{proof}A simple algorithm for deciding satisfiability is to enumerate all $2^{|Var(\varphi)|}$ valuations of its variables, and check if any of them satisfies the formula. This algorithm needs
+\[ 2^{p(\varphi)}\bigO(|\varphi|)\text{-steps.}\]
+\end{proof}\noindent
+The choice of the right parameter is fundamental for fixed-parameter tractability. Consider the problem  $\pSAT = \{(\varphi,k)\ |\ \varphi\text{ is a satisfiable k-formula}\}$. If this problem is fit, then \threeSAT can be decided in time $f(3)|\varphi|^d$ for some $f$ and $d$. This implies $\Po = \NP$.
+
+\begin{example}Let $\Sigma$ be a finite alphabet, and $size: \Sigma^* \rightarrow \mathbb{N}$ be defined by $size(w) = |w|$ for all $w \in \Sigma^*$. For every decidable $L\subseteq \Sigma^*$ the problem $(L,size)$ is fpt. For every problem $L \in P$, and every parameterization $p$, $(L,p) \in \FPT$.
+\end{example}
+
+\begin{definition}[fpt-reduction] Let $(L,p)$ and $(L',p')$ be parameterization problems over $\Sigma$ and $\Sigma'$, respectively. And fpt-reduction from $(L,p)$ to $(L',p')$ is a mapping $R: \Sigma^* \rightarrow (\Sigma')^*$ such that:
+\begin{enumerate}
+\item $\forall w \in \Sigma^*$, $w \in L$ iff $R(w) \in L'$
+\item there exists a computable $f$, and $d \in \mathbb{N}$ sucht that $R(w)$ is computable in time $f(p(w))|w|^d$, and 
+\item there is a computable function $g: \mathbb{N} \rightarrow \mathbb{N}$ and $p'(R(w)) \leq g(p(w))$ for all $w \in \Sigma^*$
+\end{enumerate}
+\end{definition}
+
 
 \end{document}
 
