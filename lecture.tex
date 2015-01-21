@@ -5,9 +5,11 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usetikzlibrary{positioning}
 \usepackage{amsthm}
 \usepackage{xfrac}
 \usepackage{color}
+\usepackage{paralist}
 
 % some commands
 \newcommand{\todo}[1]{{\colorbox{yellow}{\textbf{TODO:} #1}}}
@@ -507,6 +509,206 @@ The choice of the right parameter is fundamental for fixed-parameter tractabilit
 \item there is a computable function $g: \mathbb{N} \rightarrow \mathbb{N}$ and $p'(R(w)) \leq g(p(w))$ for all $w \in \Sigma^*$
 \end{enumerate}
 \end{definition}
+
+%-----------------------------------------------------------------------------------------------------------------------------
+
+\chapter{The Polynomial Hierarchy and $PSpace$}
+
+There is a finer level of detail between $\Po$ and $PSpace$ then just $\NP$ and $co\NP$ If $\Po \neq \NP$, there is a hierarchy of complexity classes; defined with the help of \emph{oracle} TMs. 
+
+\begin{definition} An \emph{oracle} is a language $O \subseteq \Sigma^*$. An \emph{oracle TM $M^O$} is a (deterministic or nondeterministic) TM extended with an oracle $O$. This machine has an additional \emph{oracle tape} and distinguished states $q_?$, $q_f$ and $q_t$. For all states except $q_?$ transitions are defined as usual. If $M^O$ enters state $q_?$, then the next state is $q_t$ if the word in the oracle tape belongs to $O$, and $q_f$ otherwise. This transition requires only one step and does not change the head positions or tape contents. 
+\end{definition}
+Intuitively, an oracle TM $MW*$ has an auxiliary subprocedure deciding $O$ as a ``black box''. The time and space used by this subprocedure is not counted as resources of $M^O$. Notice that $O$ does not even need to be decidable!
+
+\begin{definition} \mbox{}
+\begin{itemize}
+ \item $\Po^O = \{ L \mid L~\text{is decidable by an oracle DTM $M^O$ in polynomial time}\}$,
+ \item $\NP^O = \{ L \mid L~\text{is decidable by an oracle NTM $M^O$ in $M^O$ polynomial time}\}$,
+ \item $\Po^{\mathcal{C}} = \bigcup_{L \in \mathcal{C}} \Po^L$, and 
+ \item $\NP^{\mathcal{C}} = \bigcup_{L \in \mathcal{C}} \NP^L$. 
+\end{itemize}
+\end{definition}
+For example, $L \in \Po^\NP$ if there is a polytime-bounded oracle DTM $M^O$, such that $O \in \NP$ and $L(M^O) = L$. Notice that $\Po^\Po = P$. One can simpley combine the oracle TM $M^O$ with a polytime-bounded DTM $M$ for $O$ into a new machine $N$. 
+
+This idea \emph{cannot} be used to show e.g.\ that $\NP = \Po^{\NP}$ to ensure that the new machine should switch to $q_f$, a single computation of $N$ would have to analyse all computations of $M$. 
+
+\begin{definition} We inductively define the complexity classes $\Sigma_k^\Po$, $\Pi_k^\Po$ and $\Delta_k^\Po$, for $k \geq 0$, as follows:
+\begin{itemize}
+ \item $\Sigma_0^\Po := \Pi_0^\Po := \Delta_0^\Po := P$
+ \item $\Sigma_{k+1}^\Po := \NP^{\Sigma_k^\Po}$ 
+ \item $\Pi_{k+1}^\Po := co-\Sigma_{k+1}^\Po$
+ \item $\Delta_{k+1}^\Po := \Po^{\Sigma_k^\Po}$
+\end{itemize}
+\end{definition}
+
+We can prove that $\Delta_1^\Po = \Po$ ($\Po^\Po = \Po$), $\Sigma_1^\Po = \NP$, and $\Pi_1^\Po = co-\NP$. These classes form the following hierarchy:
+\begin{figure}[!ht]
+\newcommand{\hdiff}{4em}
+\newcommand{\vdiff}{2em}
+\centering
+\begin{tikzpicture}
+	\node at (0,0) (p) {$\Po$};
+	\node at (-\hdiff, \vdiff) (np) {$\NP$};
+	\node at ( \hdiff, \vdiff) (co-np) {$co-\NP$};
+	\node at ( 0, 2*\vdiff) (d2) {$\Delta_2^\Po = \Po^\NP$};
+	\node at (-\hdiff, 3*\vdiff) (s2) {$\Sigma_2^\Po$};
+	\node at (\hdiff, 3*\vdiff) (p2) {$\Pi_2^\Po$};
+	\node at (0, 4*\vdiff) (d3) {$\Delta_3^\Po$};
+	\node at (-\hdiff, 5*\vdiff) {$\vdots$};
+	\node at (\hdiff, 5*\vdiff) {$\vdots$};
+	\node at (0,5*\vdiff) {$\vdots$};
+	\foreach \a/\b in {p/np,p/co-np,np/d2,co-np/d2,d2/s2,d2/p2,s2/d3,p2/d3}{\draw (\a) to (\b);}
+\end{tikzpicture}
+\end{figure}
+
+We define the class $PH$ of the polynomial hierarchy: 
+\[PH := \bigcup_{k \geq 0} \Sigma_k^\Po.\]
+Obviously, $\Po \subseteq PH$. It is also possible to show that $PH \subseteq PSPACE$. It is unknown whether any of these inclusions is strict. An open problem is whether $PH$ \emph{collapses}: i.e.\, there is a $k \geq 0$ such that $PH = \Sigma_k^\Po$. Two results in this direction are the following:
+\begin{itemize}
+ \item If $\Po = \NP$, then $\Po = PH$.
+ \item If $PH = PSpace$, then $PH$ collapses. 
+\end{itemize}
+We now give an example of a $\Pi_2^\Po$-complete problem. 
+
+As it is usual in propositional logic, we describe a truth assignment $t$ as the set of variables that it makes true. A \emph{model} of a formula $\varphi$ is a truth assignment $t$ that satisfies $\varphi$. The \emph{minimal implication problem} is to decide, given formulas $\varphi$ and $\psi$, whether all minimal models of $\varphi$ are models of $\psi$. We show that minimal implication is in $\Pi_2^\Po = co-\NP^\NP$. First we show that the following problem is in $\NP$: 
+\begin{itemize}
+ \item given a formula $\varphi$ and a truth assignment $t$, decide whether there is a model $t' \subsetneq t$ of $\varphi$. 
+\end{itemize}
+We call this \emph{non-minimality}. It is in $\NP$ since we can guess $t'$ e.g.\ by removing some variables from $t$, and check that $t'$ satisfies $\varphi$. 
+
+The complement of minimal implcation is in $\NP^\NP$: given $\varphi$ and $\psi$, a polynomial NTM may guess a truth assigment $t$ and verify that:
+\begin{enumerate}[(i)]
+ \item $t$ is a model of $\varphi$ and not of $\psi$
+ \item $t$ is minimal (as a model of $\varphi$) \label{enum:check_minimality}
+\end{enumerate}
+For (\ref{enum:check_minimality}), it simply calls an oracle for non-minimality ($\NP$) on $t$ and $\varphi$, and negates the answer. 
+
+It is also possible to show that the problem is $\Pi_2^\Po$-hard. The important consideration in this case is that before accepting or rejecting one must guess a \emph{minimal} model. This usually requires an internal minimality check ($\NP$-oracle). In fact, this kind of situations are commonly found in \emph{non-monotonic} logics, where reasoning is complete for different classes in the polynomial hierarchy. 
+
+\section*{$PSpace$}
+Just as SAT is the typical $\NP$-complete problem, validity of \emph{quantified Boolean formualas} (QBF) is a well-known $PSpace$-complete problem. 
+
+\begin{definition} A quantified Boolean formula (QBF) is an expression of the form 
+\[ Q_1p_1.Q_2p_2. \ldots Q_np_n.\varphi \]
+where $Q_i \in \{\forall, \exists\}$ and $\varphi$ is a propositional formula using only the variables $p_1, \ldots, p_n$.   
+\end{definition}
+Validity is defined inductively on the length of the chain of quantifiers. If $\varphi$ is a propositional formula, let $\varphi[p/1]$ denote the formula obtained by replacing $p$ with $1$ (true) and similarly for $\varphi[p/0]$ with $0$ (false). 
+
+\begin{definition} A QBF formula $Q_1p_1.Q_2p_2. \ldots Q_np_n.\varphi$ is \emph{valid} iff
+\begin{enumerate}
+ \item $Q_1 = \exists$ and at least one of the formulas $Q_2p_2. \ldots Q_np_n.\varphi[p_1/1]$ and \\ $Q_2p_2. \ldots Q_np_n.\varphi[p_1/0]$ is valid. 
+ \item $Q_1 = \forall$ and both $Q_2p_2. \ldots Q_np_n.\varphi[p_1/1]$ and $Q_2p_2. \ldots Q_np_n.\varphi[p_1/0]$ are valid. 
+ \item $n = 0$ and $\varphi$ (which contains no variables) evaluates to $1$.
+\end{enumerate} 
+Let $QBF$ denote the set of all valid QBF formulas.
+\end{definition}
+
+Consider for example the QBF $\psi = \forall p_1.\exists p_2. \forall p_3. p_1 \to p_2 \lor p_3$. To check the validity of $\psi$ we can use an \emph{and-or tree}. 
+\begin{figure}[!ht]
+ \centering
+ \tikzstyle{tn} = [fill, circle, inner sep = .2em]
+\tikzstyle{tns} = [fill, circle, inner sep = .1em]
+\begin{tikzpicture}[sibling distance = 8em, level 2/.style={sibling distance = 4em}, level 3/.style={sibling distance = 3em}, level distance = 2.5em]
+	\node[tn] (root) {}
+		child {
+			node[tn] (1) {}
+			child {
+				node[tn] (11) {} 
+				child {
+					node[tns] (111) {}
+				}
+				child {
+					node[tns] (112) {}
+				}
+			}
+			child {
+				node[tn] (12) {} 	
+				child {
+					node[tns] (121) {}
+				}
+				child {
+					node[tns] (122) {}
+				}
+			}
+		}
+		child {
+			node[tn] (2) {}
+			child {
+				node[tn] (21) {} 	
+				child {
+					node[tns] (211) {}
+				}
+				child {
+					node[tns] (212) {}
+				}
+			}
+			child {
+				node[tn] (22) {} 	
+				child {
+					node[tns] (221) {}
+				}
+				child {
+					node[tns] (222) {}
+				}
+			}
+		};
+	\node[ right = 8em of root, yshift = -1em] {$\forall$};
+	\node[ right = 4em of 2, yshift = -1em] {$\exists$};
+	\node[ right = 2em of 22, yshift = -1em] {$\forall$};
+	
+	\foreach \n in {root, 11,12,21,22}
+		{\node [below = 0.2em of \n] {$\land$};}
+	\foreach \n in {1,2}
+		{\node [below = 0.2em of \n] {$\lor$};}
+	
+	\foreach \n in {111,112,121,122,212,221,222}
+		{\node [below = 0.2em of \n] {$1$};}
+	\node[below = 0.2em of 211] {$0$};
+	\foreach \n in {1,11}{\node [left = 0.2em of \n] {$1$};}
+	\foreach \n in {root,12,2,22}{\node [right = 0.2em of \n] {$1$};}
+	\node[left = 0.2em of 21] {$0$};
+\end{tikzpicture}
+\caption{Each level corresponds to a quantifier, $\forall$-levels use $\land$-branching and $\exists$-levels use $\lor$-branching. }
+\end{figure}
+
+\begin{theorem} $QBF$ is in $PSpace$.
+\end{theorem}
+(Proof: a depth-first traversal over the and-or tree can be done in $PSpace$.)
+
+Notice that $QBF$ is $\NP$-hard: a propositional formula $\varphi$ is satisfiable iff $\exists p_1. \ldots \exists p_n.\varphi$ is valid (where $p_1,\ldots, p_n$ ar ethe variables in $\varphi$). Similarly, $QBF$ is co-$NP$-hard ($\forall p_1. \ldots \forall p_n.\varphi$ encodes validity of $\varphi$.) Actually it is $PSpace$-hard. 
+
+\begin{theorem} $QBF$ is $PSpace$-hard.
+\end{theorem}
+
+\paragraph{Proof} Let $L \in PSpace$, then there exists a $d \geq 0$ and an $n^d$-space bounded DTM $M = (Q, \Sigma, \Gamma, \delta, q_0, q_+ q_-)$ such that $L(M) = L$. We construct in polynomial time for each input $w$ a QBF $\psi_w$ such that $M$ accepts $w$ iff $\psi_w$ is valid. Notice that $M$ may needs exponential time; thus, we cannot use the same construction as in Theorem 4.13 where we had different variables for each step made. Instead, we use the ideas from the proof of Theorem 3.9 (Savitch's). Recall that the proof was based on the predicate $Path(C,C',i)$ expressing that there is a path of length \emph{at most $2^i$} from $C$ to $C'$ in the configuration graph $G_M(n^d)$. 
+
+We can represent a configuration as a tuple of the following variables
+\begin{itemize}
+ \item $s_q$ for every $q \in Q$, describes the curren state
+ \item $T_{a,i}$ for every $a \in \Gamma$, $i \leq n^d$, describes the symbol on the $i$th tape cell
+ \item $H_i$ for every $i \leq n^d$, describes the position of the head
+\end{itemize}
+The following formula ensures that such a tuple $\bar{C}$ encodes a valid configuration:
+\begin{align*}
+ \psi_{\mathit{conf}}(\bar{C}) := {}& \bigvee_{q \in Q} S_q \land \bigwedge_{q, q' \in Q\colon q \neq q'} \neg (S_q \land S_{q'}) \land \\
+ & \bigvee_{i \leq n^d} H_i \land \bigwedge_{i, i' \leq n^d \colon i \neq i'} \neg (H_i \land H_{i'}) \land \\
+ & \bigwedge_{i \leq n^d} \left(\bigvee_{a \in \Gamma} T_{a,i} \land \bigwedge_{a, a' \in \Gamma \colon a \neq a'} \neg ( T_{a,i} \land T_{a', i}) \right)\\
+\end{align*}
+We describe the $Path(C,C',i)$ using the transitions of $M$, through the following formula (where $\leftarrow(i)$, $\downarrow(i)$ and $\rightarrow(i)$ are defined as in the proof of Theorem~4.13):
+\begin{align*}
+ \psi_{\mathit{next}}(\bar{C}, \bar{C}') := {}& \psi_{\mathit{conf}}(\bar{C}) \land \psi_{\mathit{conf}}(\bar{C}') \land {} \\
+ & \bigwedge_{i \leq n^d} \big( (H_i \to ( \bigwedge_{j \neq i, a \in \Gamma} ( T_{a,i} \iff T_{a,j}' ) \\
+ & \land \bigwedge_{\delta(q,a) = (q',a',D), D(i) \leq n^d} ( S_q \land T_{a,i} \implies (S_{q'} \land T_{a',i}' \land H_{D(i)}')) \big)
+\end{align*}
+We define $Path(C,C',\delta)$ inductively as follows:
+\[ \psi^0_{\mathit{reach}}(\bar{C},\bar{C}') = \psi_{\mathit{next}}(\bar{C},\bar{C}') \lor \psi_{\mathit{eq}}(\bar{C},\bar{C}') \]
+For $ i > 0$ we use quantifiers:
+\begin{align*}
+ \psi_{\mathit{reach}}^i(\bar{C},\bar{C}') := & \exists \bar{C}'' \forall \bar{K} \forall \bar{K}'.
+  \Big( \big( \psi_{\mathit{eq}}(\bar{C},\bar{K}) \land \psi_{\mathit{eq}}(\bar{C}'',\bar{K}')\big) \\
+  & \lor \big( \psi_{\mathit{eq}}(\bar{C}'', \bar{K}') \land \psi_{\mathit{eq}}(\bar{C}',\bar{K})\big)\Big) \implies 
+  \psi_{\mathit{reach}}^{i-1}(\bar{K},\bar{K}')
+\end{align*}
 
 \end{document}
 
